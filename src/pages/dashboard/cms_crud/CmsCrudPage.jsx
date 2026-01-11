@@ -233,7 +233,7 @@ const StatusChip = ({ status }) => {
   const statusConfig = {
     published: {
       label: 'Published',
-      color: 'bg-gradient-to-r from-emerald-100 to-green-100 text-emerald-800 border-emerald-200',
+      color: 'bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 border-emerald-200',
       icon: <CheckCircle className="w-4 h-4" />
     },
     draft: {
@@ -243,7 +243,7 @@ const StatusChip = ({ status }) => {
     },
     scheduled: {
       label: 'Scheduled',
-      color: 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 border-blue-200',
+      color: 'bg-gradient-to-r from-cyan-100 to-teal-100 text-cyan-800 border-cyan-200',
       icon: <ScheduleIcon className="w-4 h-4" />
     },
     archived: {
@@ -268,12 +268,12 @@ const BlogTypeChip = ({ type }) => {
   const typeConfig = {
     blog: {
       label: 'Blog',
-      color: 'bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800',
+      color: 'bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800',
       icon: <ArticleIcon className="w-4 h-4" />
     },
     white_paper: {
       label: 'White Paper',
-      color: 'bg-gradient-to-r from-purple-100 to-violet-100 text-purple-800',
+      color: 'bg-gradient-to-r from-teal-100 to-emerald-100 text-teal-800',
       icon: <ArticleIcon className="w-4 h-4" />
     },
     case_study: {
@@ -351,7 +351,7 @@ const SeoScore = ({ score = 0 }) => {
 // Filter Component
 const FilterBar = ({ filters, onFilterChange }) => {
   return (
-    <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
+    <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl shadow-lg p-6 mb-6 border border-emerald-100">
       <h3 className="text-lg font-semibold text-gray-900 mb-4">Filter Blogs</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <div>
@@ -363,7 +363,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
             <select
               value={filters.status || ''}
               onChange={(e) => onFilterChange('status', e.target.value)}
-              className="pl-10 w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/70 backdrop-blur-sm"
+              className="pl-10 w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white/70 backdrop-blur-sm"
             >
               <option value="">All Statuses</option>
               <option value="published">Published</option>
@@ -383,7 +383,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
             <select
               value={filters.blog_type || ''}
               onChange={(e) => onFilterChange('blog_type', e.target.value)}
-              className="pl-10 w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/70 backdrop-blur-sm"
+              className="pl-10 w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white/70 backdrop-blur-sm"
             >
               <option value="">All Types</option>
               <option value="blog">Blog Post</option>
@@ -402,7 +402,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
             <select
               value={filters.is_featured || ''}
               onChange={(e) => onFilterChange('is_featured', e.target.value)}
-              className="pl-10 w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/70 backdrop-blur-sm"
+              className="pl-10 w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white/70 backdrop-blur-sm"
             >
               <option value="">All Posts</option>
               <option value="true">Featured Only</option>
@@ -422,7 +422,7 @@ const FilterBar = ({ filters, onFilterChange }) => {
               placeholder="Search by title, content, or keyword..."
               value={filters.search || ''}
               onChange={(e) => onFilterChange('search', e.target.value)}
-              className="pl-10 pr-10 w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm bg-white/70 backdrop-blur-sm"
+              className="pl-10 pr-10 w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white/70 backdrop-blur-sm"
             />
             {filters.search && (
               <button
@@ -783,13 +783,13 @@ const CmsCrudPage = () => {
         className="fixed inset-0 bg-gradient-to-br from-gray-900/85 to-gray-950/90 backdrop-blur-sm transition-all duration-300 ease-out"
         onClick={() => setOpenViewModal(false)}
       >
-        <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/10 to-purple-600/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-emerald-600/10 to-teal-600/10"></div>
       </div>
       
       {/* Enhanced Modal Container with glass morphism */}
-      <div className="relative z-10 bg-gradient-to-br from-white to-gray-50/95 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden border border-white/40 backdrop-blur-xl">
+      <div className="relative z-10 bg-gradient-to-br from-white to-emerald-50/95 rounded-2xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden border border-white/40 backdrop-blur-xl">
         {/* Modal Header with gradient */}
-        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-8 py-6">
+        <div className="bg-gradient-to-r from-emerald-700 via-teal-600 to-teal-400 px-8 py-6">
           <div className="flex justify-between items-start">
             <div className="flex-1 pr-4">
               <h3 className="text-2xl font-bold text-white mb-3">{selectedBlog?.title}</h3>
@@ -823,7 +823,7 @@ const CmsCrudPage = () => {
         </div>
         
         {/* Enhanced Tabs with modern design */}
-        <div className="border-b border-gray-200/50 bg-gradient-to-r from-gray-50 to-white">
+        <div className="border-b border-gray-200/50 bg-gradient-to-r from-emerald-50 to-white">
           <nav className="flex space-x-1 px-6">
             {['Overview', 'Content', 'SEO Details', 'Analytics'].map((tab, index) => (
               <button
@@ -832,7 +832,7 @@ const CmsCrudPage = () => {
                 className={`
                   relative px-6 py-4 text-sm font-medium transition-all duration-300
                   ${tabValue === index 
-                    ? 'text-blue-600' 
+                    ? 'text-emerald-600' 
                     : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
                   }
                 `}
@@ -845,7 +845,7 @@ const CmsCrudPage = () => {
                   <span>{tab}</span>
                 </span>
                 {tabValue === index && (
-                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-t-full"></div>
+                  <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-t-full"></div>
                 )}
               </button>
             ))}
@@ -859,7 +859,7 @@ const CmsCrudPage = () => {
               {/* Left Column - SEO & Stats */}
               <div className="space-y-6">
                 {/* SEO Score Card */}
-                <div className="bg-gradient-to-br from-white to-blue-50 rounded-xl p-6 shadow-lg border border-blue-100">
+                <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-6 shadow-lg border border-emerald-100">
                   <div className="flex items-center justify-between mb-4">
                     <h4 className="text-lg font-semibold text-gray-900">SEO Analysis</h4>
                     <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
@@ -909,23 +909,23 @@ const CmsCrudPage = () => {
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 shadow border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+                  <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-4 shadow border border-emerald-100 hover:shadow-lg transition-shadow duration-300">
                     <div className="flex items-center space-x-2 mb-2">
-                      <Visibility className="w-5 h-5 text-blue-500" />
+                      <Visibility className="w-5 h-5 text-emerald-500" />
                       <span className="text-sm font-medium text-gray-600">Views</span>
                     </div>
                     <p className="text-2xl font-bold text-gray-900">{selectedBlog.view_count.toLocaleString()}</p>
                     <p className="text-xs text-gray-500 mt-1">Total views</p>
                   </div>
-                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 shadow border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+                  <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-4 shadow border border-emerald-100 hover:shadow-lg transition-shadow duration-300">
                     <div className="flex items-center space-x-2 mb-2">
-                      <AccessTime className="w-5 h-5 text-purple-500" />
+                      <AccessTime className="w-5 h-5 text-teal-500" />
                       <span className="text-sm font-medium text-gray-600">Read Time</span>
                     </div>
                     <p className="text-2xl font-bold text-gray-900">{selectedBlog.reading_time_minutes} min</p>
                     <p className="text-xs text-gray-500 mt-1">Average reading</p>
                   </div>
-                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 shadow border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+                  <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-4 shadow border border-emerald-100 hover:shadow-lg transition-shadow duration-300">
                     <div className="flex items-center space-x-2 mb-2">
                       <TextFields className="w-5 h-5 text-emerald-500" />
                       <span className="text-sm font-medium text-gray-600">Words</span>
@@ -933,9 +933,9 @@ const CmsCrudPage = () => {
                     <p className="text-2xl font-bold text-gray-900">{selectedBlog.word_count.toLocaleString()}</p>
                     <p className="text-xs text-gray-500 mt-1">Content length</p>
                   </div>
-                  <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-4 shadow border border-gray-100 hover:shadow-lg transition-shadow duration-300">
+                  <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-4 shadow border border-emerald-100 hover:shadow-lg transition-shadow duration-300">
                     <div className="flex items-center space-x-2 mb-2">
-                      <LinkIcon className="w-5 h-5 text-orange-500" />
+                      <LinkIcon className="w-5 h-5 text-teal-500" />
                       <span className="text-sm font-medium text-gray-600">Links</span>
                     </div>
                     <p className="text-2xl font-bold text-gray-900">{selectedBlog.internal_links?.length || 0}</p>
@@ -947,7 +947,7 @@ const CmsCrudPage = () => {
               {/* Right Column - Details */}
               <div className="space-y-6">
                 {/* SEO Details Card */}
-                <div className="bg-gradient-to-br from-white to-indigo-50 rounded-xl p-6 shadow-lg border border-indigo-100">
+                <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-6 shadow-lg border border-emerald-100">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4">SEO Details</h4>
                   <div className="space-y-4">
                     <div>
@@ -956,9 +956,9 @@ const CmsCrudPage = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-600 mb-1">Primary Keyword</label>
-                      <div className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-lg border border-blue-200">
-                        <Language className="w-4 h-4 text-blue-600 mr-2" />
-                        <span className="font-medium text-blue-800">{selectedBlog.primary_keyword}</span>
+                      <div className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-lg border border-emerald-200">
+                        <Language className="w-4 h-4 text-emerald-600 mr-2" />
+                        <span className="font-medium text-emerald-800">{selectedBlog.primary_keyword}</span>
                       </div>
                     </div>
                     <div>
@@ -969,12 +969,12 @@ const CmsCrudPage = () => {
                 </div>
 
                 {/* Timeline Card */}
-                <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 shadow-lg border border-gray-100">
+                <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-6 shadow-lg border border-emerald-100">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4">Timeline</h4>
                   <div className="space-y-3">
-                    <div className="flex items-center space-x-3 p-3 bg-white/70 rounded-lg border border-blue-100 hover:bg-blue-50/50 transition-colors">
-                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <CalendarToday className="w-5 h-5 text-blue-600" />
+                    <div className="flex items-center space-x-3 p-3 bg-white/70 rounded-lg border border-emerald-100 hover:bg-emerald-50/50 transition-colors">
+                      <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                        <CalendarToday className="w-5 h-5 text-emerald-600" />
                       </div>
                       <div>
                         <p className="text-sm font-medium text-gray-600">Published</p>
@@ -984,9 +984,9 @@ const CmsCrudPage = () => {
                       </div>
                     </div>
                     {selectedBlog.scheduled_publish_at && (
-                      <div className="flex items-center space-x-3 p-3 bg-white/70 rounded-lg border border-purple-100 hover:bg-purple-50/50 transition-colors">
-                        <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center flex-shrink-0">
-                          <ScheduleIcon className="w-5 h-5 text-purple-600" />
+                      <div className="flex items-center space-x-3 p-3 bg-white/70 rounded-lg border border-teal-100 hover:bg-teal-50/50 transition-colors">
+                        <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center flex-shrink-0">
+                          <ScheduleIcon className="w-5 h-5 text-teal-600" />
                         </div>
                         <div>
                           <p className="text-sm font-medium text-gray-600">Scheduled For</p>
@@ -1012,15 +1012,15 @@ const CmsCrudPage = () => {
           {tabValue === 1 && selectedBlog && (
             <div className="space-y-6">
               {/* Excerpt Card */}
-              <div className="bg-gradient-to-br from-white to-blue-50 rounded-xl p-6 shadow-lg border border-blue-100">
+              <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-6 shadow-lg border border-emerald-100">
                 <h4 className="text-lg font-semibold text-gray-900 mb-4">Excerpt</h4>
-                <div className="bg-white/70 border border-blue-200 rounded-lg p-5 hover:border-blue-300 transition-colors">
+                <div className="bg-white/70 border border-emerald-200 rounded-lg p-5 hover:border-emerald-300 transition-colors">
                   <p className="text-gray-700 leading-relaxed">{selectedBlog.excerpt}</p>
                 </div>
               </div>
 
               {/* Content Card */}
-              <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl p-6 shadow-lg border border-gray-100">
+              <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-6 shadow-lg border border-emerald-100">
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-lg font-semibold text-gray-900">Content Preview</h4>
                   <div className="flex items-center space-x-2 text-sm text-gray-600 bg-white/70 px-3 py-1.5 rounded-lg border border-gray-200">
@@ -1030,7 +1030,7 @@ const CmsCrudPage = () => {
                 </div>
                 <div className="bg-white/70 border border-gray-200 rounded-lg p-5 max-h-80 overflow-y-auto custom-scrollbar hover:border-gray-300 transition-colors">
                   <div 
-                    className="prose prose-blue max-w-none"
+                    className="prose prose-emerald max-w-none"
                     dangerouslySetInnerHTML={{ __html: selectedBlog.body || '' }}
                   />
                 </div>
@@ -1058,8 +1058,8 @@ const CmsCrudPage = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-600 mb-1">Canonical URL</label>
                       <div className="flex items-center space-x-2 p-3 bg-white/70 rounded-lg border border-gray-200">
-                        <LinkIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                        <span className="text-blue-600 text-sm truncate">{selectedBlog.canonical_url}</span>
+                        <LinkIcon className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                        <span className="text-emerald-600 text-sm truncate">{selectedBlog.canonical_url}</span>
                       </div>
                     </div>
                   )}
@@ -1069,7 +1069,7 @@ const CmsCrudPage = () => {
               {/* Keywords & Links Card */}
               <div className="space-y-6">
                 {/* Keywords Card */}
-                <div className="bg-gradient-to-br from-white to-purple-50 rounded-xl p-6 shadow-lg border border-purple-100">
+                <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-6 shadow-lg border border-emerald-100">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4">Keywords</h4>
                   <div>
                     <label className="block text-sm font-medium text-gray-600 mb-2">Secondary Keywords</label>
@@ -1078,7 +1078,7 @@ const CmsCrudPage = () => {
                         selectedBlog.secondary_keywords.map((keyword, index) => (
                           <span 
                             key={index} 
-                            className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-purple-100 to-violet-100 text-purple-800 rounded-lg text-sm font-medium border border-purple-200 hover:border-purple-300 transition-colors cursor-default"
+                            className="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-800 rounded-lg text-sm font-medium border border-emerald-200 hover:border-emerald-300 transition-colors cursor-default"
                           >
                             {keyword}
                           </span>
@@ -1091,20 +1091,20 @@ const CmsCrudPage = () => {
                 </div>
 
                 {/* Internal Links Card */}
-                <div className="bg-gradient-to-br from-white to-orange-50 rounded-xl p-6 shadow-lg border border-orange-100">
+                <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-6 shadow-lg border border-emerald-100">
                   <h4 className="text-lg font-semibold text-gray-900 mb-4">Internal Links</h4>
                   {selectedBlog.internal_links?.length > 0 ? (
                     <ul className="space-y-3">
                       {selectedBlog.internal_links.map((link, index) => (
-                        <li key={index} className="flex items-center space-x-3 p-3 bg-white/70 rounded-lg border border-orange-200 hover:bg-orange-50/50 transition-colors">
-                          <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
-                            <LinkIcon className="w-5 h-5 text-orange-600" />
+                        <li key={index} className="flex items-center space-x-3 p-3 bg-white/70 rounded-lg border border-emerald-200 hover:bg-emerald-50/50 transition-colors">
+                          <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                            <LinkIcon className="w-5 h-5 text-emerald-600" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-900 truncate">{link.title}</p>
                             <p className="text-xs text-gray-500 mt-0.5">Anchor: "{link.anchor}"</p>
                           </div>
-                          <button className="text-xs px-3 py-1.5 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition-colors">
+                          <button className="text-xs px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors">
                             View
                           </button>
                         </li>
@@ -1121,10 +1121,10 @@ const CmsCrudPage = () => {
           {tabValue === 3 && selectedBlog && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Author Card */}
-              <div className="bg-gradient-to-br from-white to-blue-50 rounded-xl p-6 shadow-lg border border-blue-100">
+              <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl p-6 shadow-lg border border-emerald-100">
                 <h4 className="text-lg font-semibold text-gray-900 mb-4">Author</h4>
-                <div className="flex items-center space-x-4 p-4 bg-white/70 rounded-xl border border-blue-200 hover:border-blue-300 transition-colors">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <div className="flex items-center space-x-4 p-4 bg-white/70 rounded-xl border border-emerald-200 hover:border-emerald-300 transition-colors">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-r from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
                     <span className="text-xl font-bold text-white">
                       {selectedBlog.author_name?.charAt(0)}
                     </span>
@@ -1133,10 +1133,10 @@ const CmsCrudPage = () => {
                     <h5 className="font-bold text-gray-900 text-lg">{selectedBlog.author_name}</h5>
                     <p className="text-gray-600 text-sm">Content Creator</p>
                     <div className="flex items-center space-x-3 mt-3">
-                      <button className="text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
+                      <button className="text-xs px-3 py-1.5 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition-colors">
                         View Profile
                       </button>
-                      <button className="text-xs px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 transition-colors">
+                      <button className="text-xs px-3 py-1.5 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 transition-colors">
                         Message
                       </button>
                     </div>
@@ -1154,8 +1154,8 @@ const CmsCrudPage = () => {
                     </div>
                     <div className="text-sm text-gray-600">Total Views</div>
                   </div>
-                  <div className="p-4 bg-white/70 rounded-xl border border-blue-200 hover:border-blue-300 transition-colors">
-                    <div className="text-2xl font-bold text-blue-700 mb-1">
+                  <div className="p-4 bg-white/70 rounded-xl border border-teal-200 hover:border-teal-300 transition-colors">
+                    <div className="text-2xl font-bold text-teal-700 mb-1">
                       {Math.round(selectedBlog.view_count / 30)}
                     </div>
                     <div className="text-sm text-gray-600">Avg Daily Views</div>
@@ -1173,19 +1173,19 @@ const CmsCrudPage = () => {
         </div>
         
         {/* Enhanced Modal Footer */}
-        <div className="bg-gradient-to-r from-gray-50 to-white px-8 py-5 border-t border-gray-200/50">
+        <div className="bg-gradient-to-r from-emerald-50 to-white px-8 py-5 border-t border-gray-200/50">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="flex flex-wrap gap-3">
               <button
                 onClick={handleCopyLink}
-                className="inline-flex items-center px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:shadow"
+                className="inline-flex items-center px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 hover:shadow"
               >
                 <ContentCopy className="w-4 h-4 mr-2" />
                 {copied ? 'Copied!' : 'Copy Link'}
               </button>
               <button
                 onClick={() => window.open(selectedBlog?.url, '_blank')}
-                className="inline-flex items-center px-4 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:shadow-lg"
+                className="inline-flex items-center px-4 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-emerald-700 to-teal-400 hover:from-emerald-800 hover:to-teal-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 hover:shadow-lg"
               >
                 <OpenInNew className="w-4 h-4 mr-2" />
                 View Live
@@ -1197,7 +1197,7 @@ const CmsCrudPage = () => {
                   setOpenViewModal(false);
                   handleEdit(selectedBlog);
                 }}
-                className="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all duration-200 hover:shadow-lg hover:scale-105"
+                className="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all duration-200 hover:shadow-lg hover:scale-105"
               >
                 <EditIcon className="w-5 h-5 mr-2" />
                 Edit Post
@@ -1221,20 +1221,20 @@ const CmsCrudPage = () => {
           setSelectedBlog(null);
         }}
       >
-        <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/10 to-purple-600/10"></div>
+        <div className="absolute inset-0 bg-gradient-to-tr from-emerald-600/10 to-teal-600/10"></div>
       </div>
       
       {/* Enhanced Modal Container */}
-      <div className="relative z-10 bg-gradient-to-br from-white to-gray-50/95 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-white/40 backdrop-blur-xl">
+      <div className="relative z-10 bg-gradient-to-br from-white to-emerald-50/95 rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden border border-white/40 backdrop-blur-xl">
         <form onSubmit={handleFormSubmit}>
           {/* Modal Header with gradient */}
-          <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 px-8 py-6">
+          <div className="bg-gradient-to-r from-emerald-700 via-teal-600 to-teal-400 px-8 py-6">
             <div className="flex justify-between items-center">
               <div>
                 <h3 className="text-2xl font-bold text-white">
                   {openEditModal ? 'Edit Blog Post' : 'Create New Blog'}
                 </h3>
-                <p className="text-blue-100 mt-2">
+                <p className="text-emerald-100 mt-2">
                   {openEditModal ? 'Update your blog post details' : 'Create a new engaging blog post'}
                 </p>
               </div>
@@ -1255,7 +1255,7 @@ const CmsCrudPage = () => {
           </div>
           
           {/* Enhanced Tabs */}
-          <div className="border-b border-gray-200/50 bg-gradient-to-r from-gray-50 to-white">
+          <div className="border-b border-gray-200/50 bg-gradient-to-r from-emerald-50 to-white">
             <nav className="flex space-x-1 px-6">
               {['Basic Info', 'Content', 'SEO & Settings'].map((tab, index) => (
                 <button
@@ -1265,7 +1265,7 @@ const CmsCrudPage = () => {
                   className={`
                     relative px-6 py-4 text-sm font-medium transition-all duration-300
                     ${tabValue === index 
-                      ? 'text-blue-600' 
+                      ? 'text-emerald-600' 
                       : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100/50'
                     }
                   `}
@@ -1277,7 +1277,7 @@ const CmsCrudPage = () => {
                     <span>{tab}</span>
                   </span>
                   {tabValue === index && (
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-t-full"></div>
+                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-t-full"></div>
                   )}
                 </button>
               ))}
@@ -1300,7 +1300,7 @@ const CmsCrudPage = () => {
                       value={formData.title}
                       onChange={handleInputChange}
                       required
-                      className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/70 backdrop-blur-sm"
+                      className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white/70 backdrop-blur-sm"
                       placeholder="Enter blog post title"
                     />
                   </div>
@@ -1313,7 +1313,7 @@ const CmsCrudPage = () => {
                       name="blog_type"
                       value={formData.blog_type}
                       onChange={handleInputChange}
-                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/70 backdrop-blur-sm"
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white/70 backdrop-blur-sm"
                     >
                       <option value="blog">Blog Post</option>
                       <option value="white_paper">White Paper</option>
@@ -1326,7 +1326,7 @@ const CmsCrudPage = () => {
                       name="status"
                       value={formData.status}
                       onChange={handleInputChange}
-                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/70 backdrop-blur-sm"
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white/70 backdrop-blur-sm"
                     >
                       <option value="draft">Draft</option>
                       <option value="published">Published</option>
@@ -1344,7 +1344,7 @@ const CmsCrudPage = () => {
                     value={formData.scheduled_publish_at}
                     onChange={handleInputChange}
                     disabled={formData.status !== 'scheduled'}
-                    className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/70 backdrop-blur-sm disabled:bg-gray-100 disabled:text-gray-500"
+                    className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white/70 backdrop-blur-sm disabled:bg-gray-100 disabled:text-gray-500"
                   />
                   {formData.status !== 'scheduled' && (
                     <p className="mt-2 text-xs text-gray-500">Only available for scheduled status</p>
@@ -1378,7 +1378,7 @@ const CmsCrudPage = () => {
                       value={formData.excerpt}
                       onChange={handleTextareaChange}
                       rows={3}
-                      className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/70 backdrop-blur-sm"
+                      className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white/70 backdrop-blur-sm"
                       placeholder="Short summary (used for meta description fallback)"
                     />
                   </div>
@@ -1396,7 +1396,7 @@ const CmsCrudPage = () => {
                       onChange={handleTextareaChange}
                       required
                       rows={12}
-                      className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/70 backdrop-blur-sm"
+                      className="pl-10 block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white/70 backdrop-blur-sm"
                       placeholder="Main article content. Supports HTML tags for formatting."
                     />
                   </div>
@@ -1419,7 +1419,7 @@ const CmsCrudPage = () => {
                     value={formData.seo_title}
                     onChange={handleInputChange}
                     placeholder="50-60 characters optimal"
-                    className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/70 backdrop-blur-sm"
+                    className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white/70 backdrop-blur-sm"
                   />
                   <div className="mt-2 flex justify-between items-center">
                     <p className="text-xs text-gray-500">{formData.seo_title.length}/60 characters</p>
@@ -1439,7 +1439,7 @@ const CmsCrudPage = () => {
                     onChange={handleTextareaChange}
                     rows={2}
                     placeholder="120-160 characters optimal"
-                    className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/70 backdrop-blur-sm"
+                    className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white/70 backdrop-blur-sm"
                   />
                   <div className="mt-2 flex justify-between items-center">
                     <p className="text-xs text-gray-500">{formData.meta_description.length}/160 characters</p>
@@ -1460,7 +1460,7 @@ const CmsCrudPage = () => {
                       value={formData.primary_keyword}
                       onChange={handleInputChange}
                       required
-                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/70 backdrop-blur-sm"
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white/70 backdrop-blur-sm"
                     />
                     <p className="mt-2 text-xs text-gray-500">Main SEO keyword</p>
                   </div>
@@ -1470,7 +1470,7 @@ const CmsCrudPage = () => {
                       name="search_intent"
                       value={formData.search_intent}
                       onChange={handleInputChange}
-                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/70 backdrop-blur-sm"
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white/70 backdrop-blur-sm"
                     >
                       <option value="informational">Informational</option>
                       <option value="commercial">Commercial</option>
@@ -1488,7 +1488,7 @@ const CmsCrudPage = () => {
                       const keywords = e.target.value.split(',').map(k => k.trim()).filter(k => k);
                       setFormData(prev => ({ ...prev, secondary_keywords: keywords }));
                     }}
-                    className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/70 backdrop-blur-sm"
+                    className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white/70 backdrop-blur-sm"
                     placeholder="keyword1, keyword2, keyword3"
                   />
                   <p className="mt-2 text-xs text-gray-500">Separate keywords with commas</p>
@@ -1501,7 +1501,7 @@ const CmsCrudPage = () => {
                     name="canonical_url"
                     value={formData.canonical_url}
                     onChange={handleInputChange}
-                    className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm bg-white/70 backdrop-blur-sm"
+                    className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 sm:text-sm bg-white/70 backdrop-blur-sm"
                     placeholder="https://example.com/blog-post"
                   />
                   <p className="mt-2 text-xs text-gray-500">For duplicate content (optional)</p>
@@ -1511,14 +1511,14 @@ const CmsCrudPage = () => {
           </div>
           
           {/* Enhanced Modal Footer */}
-          <div className="bg-gradient-to-r from-gray-50 to-white px-8 py-5 border-t border-gray-200/50">
+          <div className="bg-gradient-to-r from-emerald-50 to-white px-8 py-5 border-t border-gray-200/50">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div className="flex space-x-3">
                 {tabValue > 0 && (
                   <button
                     type="button"
                     onClick={() => handleTabChange(tabValue - 1)}
-                    className="inline-flex items-center px-5 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                    className="inline-flex items-center px-5 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200"
                   >
                     ← Previous
                   </button>
@@ -1532,7 +1532,7 @@ const CmsCrudPage = () => {
                     setOpenCreateModal(false);
                     setSelectedBlog(null);
                   }}
-                  className="inline-flex items-center px-5 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                  className="inline-flex items-center px-5 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200"
                 >
                   Cancel
                 </button>
@@ -1540,7 +1540,7 @@ const CmsCrudPage = () => {
                   <button
                     type="button"
                     onClick={() => handleTabChange(tabValue + 1)}
-                    className="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:shadow-lg"
+                    className="inline-flex items-center px-5 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-emerald-700 to-teal-400 hover:from-emerald-800 hover:to-teal-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 hover:shadow-lg"
                   >
                     Next →
                   </button>
@@ -1549,7 +1549,7 @@ const CmsCrudPage = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="inline-flex items-center px-6 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="inline-flex items-center px-6 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-emerald-700 to-teal-400 hover:from-emerald-800 hover:to-teal-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {loading ? (
                       <>
@@ -1583,11 +1583,11 @@ const CmsCrudPage = () => {
         border-radius: 4px;
       }
       .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: rgba(59, 130, 246, 0.5);
+        background: rgba(16, 185, 129, 0.5);
         border-radius: 4px;
       }
       .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: rgba(59, 130, 246, 0.7);
+        background: rgba(16, 185, 129, 0.7);
       }
       .prose h1 {
         font-size: 1.5rem;
@@ -1613,7 +1613,7 @@ const CmsCrudPage = () => {
         color: #6b7280;
       }
       .prose a {
-        color: #3b82f6;
+        color: #10b981;
         text-decoration: underline;
       }
       @keyframes slideIn {
@@ -1637,16 +1637,16 @@ const CmsCrudPage = () => {
   }, []);
 
   return (
-    <div className="p-6 min-h-screen bg-gradient-to-br from-gray-50 to-blue-50/30">
+    <div className="p-6 min-h-screen bg-gradient-to-br from-teal-50 to-emerald-50/30">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 pb-6 border-b border-gray-200/50">
         <div className="mb-4 sm:mb-0">
-          <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Blog Management</h1>
+          <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-emerald-700 to-teal-400 bg-clip-text text-transparent">Blog Management</h1>
           <p className="text-gray-600 mt-2">Manage your blog posts, white papers, and case studies</p>
         </div>
         <button
           onClick={handleCreate}
-          className="inline-flex items-center px-5 py-3 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:shadow-xl hover:scale-105"
+          className="inline-flex items-center px-5 py-3 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-gradient-to-r from-emerald-700 to-teal-400 hover:from-emerald-800 hover:to-teal-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 hover:shadow-xl hover:scale-105"
         >
           <AddIcon className="w-5 h-5 mr-2" />
           Create New
@@ -1681,22 +1681,22 @@ const CmsCrudPage = () => {
       )}
 
       {/* Stats Bar */}
-      <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-6 mb-6 border border-gray-100">
+      <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl shadow-lg p-6 mb-6 border border-emerald-100">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Blog Statistics</h3>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-          <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100">
-            <p className="text-sm font-medium text-gray-600 mb-1">Total Blogs</p>
-            <p className="text-3xl font-bold text-blue-700">{filteredBlogs.length}</p>
-          </div>
           <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-lg border border-emerald-100">
+            <p className="text-sm font-medium text-gray-600 mb-1">Total Blogs</p>
+            <p className="text-3xl font-bold text-emerald-700">{filteredBlogs.length}</p>
+          </div>
+          <div className="p-4 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-lg border border-teal-100">
             <p className="text-sm font-medium text-gray-600 mb-1">Published</p>
-            <p className="text-3xl font-bold text-emerald-700">
+            <p className="text-3xl font-bold text-teal-700">
               {filteredBlogs.filter(b => b.status === 'published').length}
             </p>
           </div>
-          <div className="p-4 bg-gradient-to-br from-purple-50 to-violet-50 rounded-lg border border-purple-100">
+          <div className="p-4 bg-gradient-to-br from-cyan-50 to-teal-50 rounded-lg border border-cyan-100">
             <p className="text-sm font-medium text-gray-600 mb-1">Total Views</p>
-            <p className="text-3xl font-bold text-purple-700">
+            <p className="text-3xl font-bold text-cyan-700">
               {filteredBlogs.reduce((sum, blog) => sum + blog.view_count, 0).toLocaleString()}
             </p>
           </div>
@@ -1713,7 +1713,7 @@ const CmsCrudPage = () => {
       {loading && blogs.length === 0 ? (
         <div className="flex justify-center items-center py-20">
           <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600"></div>
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-sm text-gray-600">Loading...</span>
             </div>
@@ -1722,10 +1722,10 @@ const CmsCrudPage = () => {
       ) : (
         <>
           {/* Table */}
-          <div className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg overflow-hidden mb-6 border border-gray-100">
+          <div className="bg-gradient-to-br from-white to-emerald-50 rounded-xl shadow-lg overflow-hidden mb-6 border border-emerald-100">
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200/50">
-                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                <thead className="bg-gradient-to-r from-emerald-50 to-teal-50">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Title & Author</th>
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Content Preview</th>
@@ -1742,10 +1742,10 @@ const CmsCrudPage = () => {
                     <tr key={blog.id} className="hover:bg-gray-50/50 transition-colors duration-150">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="group">
-                          <p className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{blog.title}</p>
+                          <p className="text-sm font-semibold text-gray-900 group-hover:text-emerald-600 transition-colors">{blog.title}</p>
                           <div className="flex items-center mt-2">
-                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-r from-blue-100 to-indigo-100 flex items-center justify-center group-hover:scale-110 transition-transform">
-                              <span className="text-sm font-medium text-blue-800">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-r from-emerald-100 to-teal-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                              <span className="text-sm font-medium text-emerald-800">
                                 {blog.author_name?.charAt(0)}
                               </span>
                             </div>
@@ -1773,9 +1773,9 @@ const CmsCrudPage = () => {
                         <StatusChip status={blog.status} />
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center p-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg w-fit">
-                          <Visibility className="w-4 h-4 text-blue-500 mr-2" />
-                          <span className="text-sm font-semibold text-blue-700">{blog.view_count.toLocaleString()}</span>
+                        <div className="flex items-center p-2 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg w-fit">
+                          <Visibility className="w-4 h-4 text-emerald-500 mr-2" />
+                          <span className="text-sm font-semibold text-emerald-700">{blog.view_count.toLocaleString()}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -1783,7 +1783,7 @@ const CmsCrudPage = () => {
                           {blog.published_at 
                             ? formatDate(blog.published_at)
                             : blog.scheduled_publish_at
-                              ? <span className="text-blue-600">Scheduled: {formatDate(blog.scheduled_publish_at)}</span>
+                              ? <span className="text-emerald-600">Scheduled: {formatDate(blog.scheduled_publish_at)}</span>
                               : 'Not published'
                           }
                         </p>
@@ -1792,14 +1792,14 @@ const CmsCrudPage = () => {
                         <div className="flex space-x-2">
                           <button
                             onClick={() => handleView(blog)}
-                            className="p-2 rounded-lg bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-600 hover:from-blue-200 hover:to-indigo-200 transition-all duration-200 hover:shadow-md"
+                            className="p-2 rounded-lg bg-gradient-to-r from-emerald-100 to-teal-100 text-emerald-600 hover:from-emerald-200 hover:to-teal-200 transition-all duration-200 hover:shadow-md"
                             title="View Details"
                           >
                             <ViewIcon className="w-5 h-5" />
                           </button>
                           <button
                             onClick={() => handleEdit(blog)}
-                            className="p-2 rounded-lg bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-600 hover:from-indigo-200 hover:to-purple-200 transition-all duration-200 hover:shadow-md"
+                            className="p-2 rounded-lg bg-gradient-to-r from-teal-100 to-emerald-100 text-teal-600 hover:from-teal-200 hover:to-emerald-200 transition-all duration-200 hover:shadow-md"
                             title="Edit"
                           >
                             <EditIcon className="w-5 h-5" />
@@ -1845,7 +1845,7 @@ const CmsCrudPage = () => {
                     onClick={() => handlePageChange(pageNum)}
                     className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-all duration-200 ${
                       page === pageNum
-                        ? 'z-10 bg-gradient-to-r from-blue-600 to-indigo-600 border-blue-500 text-white shadow-lg'
+                        ? 'z-10 bg-gradient-to-r from-emerald-700 to-teal-400 border-emerald-500 text-white shadow-lg'
                         : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
                     }`}
                   >
@@ -1879,7 +1879,7 @@ const CmsCrudPage = () => {
           )}
 
           {/* Results Info */}
-          <p className="text-center text-sm text-gray-600 mb-6 p-3 bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg border border-gray-200">
+          <p className="text-center text-sm text-gray-600 mb-6 p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200">
             Showing {Math.min(startIndex + 1, filteredBlogs.length)} to {Math.min(endIndex, filteredBlogs.length)} of {filteredBlogs.length} entries
           </p>
         </>
@@ -1887,9 +1887,9 @@ const CmsCrudPage = () => {
 
       {/* Empty State */}
       {!loading && filteredBlogs.length === 0 && (
-        <div className="text-center py-16 border-2 border-dashed border-gray-300/50 rounded-2xl mt-6 bg-gradient-to-br from-white to-gray-50/50">
-          <div className="inline-flex p-4 bg-gradient-to-r from-blue-100 to-indigo-100 rounded-full mb-4">
-            <ArticleIcon className="h-12 w-12 text-blue-600" />
+        <div className="text-center py-16 border-2 border-dashed border-emerald-300/50 rounded-2xl mt-6 bg-gradient-to-br from-white to-emerald-50/50">
+          <div className="inline-flex p-4 bg-gradient-to-r from-emerald-100 to-teal-100 rounded-full mb-4">
+            <ArticleIcon className="h-12 w-12 text-emerald-600" />
           </div>
           <h3 className="mt-4 text-xl font-semibold text-gray-900">No blogs found</h3>
           <p className="mt-2 text-gray-500 mb-6 max-w-md mx-auto">
@@ -1900,7 +1900,7 @@ const CmsCrudPage = () => {
           </p>
           <button
             onClick={handleCreate}
-            className="inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:shadow-xl hover:scale-105"
+            className="inline-flex items-center px-6 py-3 border border-transparent rounded-lg shadow-lg text-sm font-medium text-white bg-gradient-to-r from-emerald-700 to-teal-400 hover:from-emerald-800 hover:to-teal-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 hover:shadow-xl hover:scale-105"
           >
             <AddIcon className="w-5 h-5 mr-2" />
             Create First Blog
