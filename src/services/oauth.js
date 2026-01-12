@@ -1,10 +1,7 @@
-// services/oauth.js
-
-const BASE_URL = 'https://72c809a42220.ngrok-free.app/users/api/';
+const BASE_URL = 'http://127.0.0.1:8000/users/api/';
 
 console.log('🔧 OAuth service initialized with BASE_URL:', BASE_URL);
 
-// Token storage functions
 const getToken = () => {
   const token = localStorage.getItem('access_token');
   console.log('🔑 Getting token from localStorage:', token ? 'Token exists' : 'No token');
@@ -37,7 +34,6 @@ const removeRefreshToken = () => {
   localStorage.removeItem('refresh_token');
 };
 
-// Helper function for API calls (with FormData support)
 const apiCall = async (endpoint, method = 'GET', data = null, requireAuth = false, isFormData = false) => {
   console.log(`🌐 apiCall: ${method} ${endpoint}`);
   console.log('🌐 Request data:', data);
@@ -46,7 +42,6 @@ const apiCall = async (endpoint, method = 'GET', data = null, requireAuth = fals
   
   const headers = {};
   
-  // Don't set Content-Type for FormData - browser will set it automatically
   if (!isFormData) {
     headers['Content-Type'] = 'application/json';
   }
@@ -153,7 +148,6 @@ const handleResponse = async (response) => {
   return data;
 };
 
-// File upload helper function
 const uploadFile = async (endpoint, formData, requireAuth = false) => {
   console.log('📤 uploadFile called for endpoint:', endpoint);
   console.log('📤 FormData entries:');
@@ -215,9 +209,7 @@ const uploadFile = async (endpoint, formData, requireAuth = false) => {
   }
 };
 
-// Main auth service
 export const authService = {
-  // Login user
   async login(email, password) {
     console.log('🔐 authService.login called with email:', email);
     const data = await apiCall('login/', 'POST', { email, password });
@@ -256,7 +248,6 @@ export const authService = {
     return data;
   },
 
-  // Register new user with avatar file
   async registerWithAvatar(userData, avatarFile = null) {
     console.log('👤📸 authService.registerWithAvatar called');
     console.log('👤📸 User data:', userData);
@@ -266,16 +257,13 @@ export const authService = {
       size: avatarFile.size
     } : 'No file');
     
-    // Create FormData object
     const formData = new FormData();
     
-    // Add user data fields
     formData.append('email', userData.email);
     formData.append('password', userData.password);
     formData.append('first_name', userData.first_name);
     formData.append('last_name', userData.last_name);
     
-    // Add avatar if exists
     if (avatarFile) {
       formData.append('avatar', avatarFile);
       console.log('👤📸 Avatar added to FormData');
@@ -286,7 +274,6 @@ export const authService = {
       console.log('  ', pair[0], ':', pair[0] === 'avatar' ? '[File object]' : pair[1]);
     }
     
-    // Use the uploadFile helper for FormData
     const data = await uploadFile('register/', formData);
     
     console.log('👤📸 RegisterWithAvatar response:', data);
@@ -304,7 +291,6 @@ export const authService = {
     return data;
   },
 
-  // Alternative method that handles both cases
   async registerUser(userData, avatarFile = null) {
     console.log('👤🔄 registerUser called, avatarFile:', !!avatarFile);
     if (avatarFile) {
@@ -314,7 +300,6 @@ export const authService = {
     }
   },
 
-  // Get current user profile
   async getCurrentUser() {
     console.log('👤 Getting current user');
     const token = getToken();
@@ -332,33 +317,28 @@ export const authService = {
     }
   },
 
-  // Get all users (requires authentication)
   async getUsers() {
     console.log('👥 Getting all users');
     return await apiCall('get_users/', 'GET', null, true);
   },
 
-  // Get specific user by ID (requires authentication)
   async getUser(userId) {
     console.log('👤 Getting user with ID:', userId);
     return await apiCall(`get_user/${userId}/`, 'GET', null, true);
   },
 
-  // Logout user
   logout() {
     console.log('🚪 Logging out user');
     removeToken();
     removeRefreshToken();
   },
 
-  // Check if user is authenticated
   isAuthenticated() {
     const hasToken = !!getToken();
     console.log('🔐 User authenticated?', hasToken);
     return hasToken;
   },
 
-  // Get authentication headers for manual fetch calls
   getAuthHeaders() {
     const token = getToken();
     if (!token) {
@@ -374,7 +354,6 @@ export const authService = {
   },
 };
 
-// Token refresh function
 async function refreshAccessToken() {
   console.log('🔄 Refreshing access token');
   const refreshToken = getRefreshToken();
@@ -421,7 +400,6 @@ function logout() {
   removeRefreshToken();
 }
 
-// Interceptor setup for axios (if you're using axios)
 export const setupAxiosInterceptors = (axiosInstance) => {
   console.log('🔧 Setting up axios interceptors');
   axiosInstance.interceptors.request.use(
@@ -464,7 +442,6 @@ export const setupAxiosInterceptors = (axiosInstance) => {
   );
 };
 
-// User service functions
 export const userService = {
   async createUser(userData) {
     console.log('👤 userService.createUser called');
@@ -481,13 +458,11 @@ export const userService = {
     return await apiCall(`delete_user/${userId}/`, 'DELETE', null, true);
   },
 
-  // Update user with avatar
   async updateUserWithAvatar(userId, userData, avatarFile = null) {
     console.log('👤📸 userService.updateUserWithAvatar called');
     if (avatarFile) {
       const formData = new FormData();
       
-      // Add user data fields
       Object.keys(userData).forEach(key => {
         formData.append(key, userData[key]);
       });
@@ -501,7 +476,6 @@ export const userService = {
   }
 };
 
-// Export all functions
 export default {
   ...authService,
   ...userService,

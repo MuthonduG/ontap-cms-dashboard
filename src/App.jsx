@@ -7,6 +7,9 @@ import CmsAnalytics from './pages/dashboard/analytics/CmsAnalytics';
 import CmsCrudPage from './pages/dashboard/cms_crud/CmsCrudPage';
 import NewsLetterPage from './pages/dashboard/news_letter/NewsLetterPage';
 import SubscribersPage from './pages/dashboard/subscibers/SubscribersPage';
+import CreateBlogPage from './pages/dashboard/cms_crud/create_blog/CreateBlogPage';
+import UpdateBlogPage from './pages/dashboard/cms_crud/update_blog/UpdateBlogPage';
+import ViewBlogsPage from './pages/dashboard/cms_crud/view_blogs/ViewBlogsPage';
 
 function App() {
   return (
@@ -17,7 +20,13 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />}>
           {/* Default route redirects to crud-page */}
           <Route index element={<Navigate to="crud-page" replace />} />
-          <Route path="crud-page" element={<CmsCrudPage />} />
+
+          <Route path="crud-page" element={<CmsCrudPage />} >
+            <Route path="create-blog" element={<CreateBlogPage/>}/>
+            <Route path="update-blog" element={<UpdateBlogPage/>}/>
+            <Route path="view-blog" element={<ViewBlogsPage/>}/>
+          </Route>
+
           <Route path="cms-analytics" element={<CmsAnalytics />} />
           <Route path="news-letter" element={<NewsLetterPage />} />
           <Route path="subscribers-page" element={<SubscribersPage />} />

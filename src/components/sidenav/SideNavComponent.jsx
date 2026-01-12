@@ -2,13 +2,19 @@ import React, { useState, useEffect } from 'react';
 import {
   Menu as MenuIcon,
   ChevronLeft,
+  ChevronRight,
   Article,
   Analytics,
   Email,
   Group,
   Logout,
   Settings,
-  Help
+  Help,
+  Add,
+  Edit,
+  Visibility,
+  ExpandMore,
+  ExpandLess
 } from '@mui/icons-material';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 
@@ -16,6 +22,7 @@ const SideNavComponent = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [expandedDropdown, setExpandedDropdown] = useState(false);
   const location = useLocation();
 
   // Navigation items - updated to use nested routes
@@ -24,25 +31,46 @@ const SideNavComponent = () => {
       id: 'crud-page',
       label: 'Blog Management',
       icon: <Article />,
-      path: 'crud-page' // Relative path (no /dashboard prefix)
+      path: 'crud-page',
+      hasDropdown: true,
+      dropdownItems: [
+        {
+          id: 'view-blogs',
+          label: 'View All Blogs',
+          icon: <Visibility />,
+          path: 'crud-page/view-blog'
+        },
+        {
+          id: 'create-blog',
+          label: 'Create New Blog',
+          icon: <Add />,
+          path: 'crud-page/create-blog'
+        },
+        {
+          id: 'update-blog',
+          label: 'Edit Blog',
+          icon: <Edit />,
+          path: 'crud-page/update-blog'
+        }
+      ]
     },
     {
       id: 'cms-analytics',
       label: 'Analytics',
       icon: <Analytics />,
-      path: 'cms-analytics' // Relative path
+      path: 'cms-analytics'
     },
     {
       id: 'news-letter',
       label: 'Newsletter',
       icon: <Email />,
-      path: 'news-letter' // Relative path
+      path: 'news-letter'
     },
     {
       id: 'subscribers-page',
       label: 'Subscribers',
       icon: <Group />,
-      path: 'subscribers-page' // ✅ Fixed typo
+      path: 'subscribers-page'
     }
   ];
 
@@ -63,16 +91,34 @@ const SideNavComponent = () => {
     };
   }, []);
 
+  // Check if we're on a blog management route and expand dropdown
+  useEffect(() => {
+    const currentPath = location.pathname;
+    if (currentPath.includes('/dashboard/crud-page')) {
+      setExpandedDropdown(true);
+    } else {
+      setExpandedDropdown(false);
+    }
+  }, [location.pathname]);
+
   const toggleSideNav = () => {
     if (isMobile) {
       setIsMobileOpen(!isMobileOpen);
     } else {
       setIsCollapsed(!isCollapsed);
+      if (!isCollapsed) {
+        setExpandedDropdown(false); // Collapse dropdown when sidebar collapses
+      }
     }
   };
 
+  const toggleDropdown = () => {
+    setExpandedDropdown(!expandedDropdown);
+  };
+
   const handleLogout = () => {
-    console.log('Logging out...');
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
     window.location.href = '/';
   };
 
@@ -80,25 +126,46 @@ const SideNavComponent = () => {
   const getActiveItem = () => {
     const currentPath = location.pathname;
     
-    // Check if we're on a dashboard route
     if (currentPath.startsWith('/dashboard')) {
-      // Extract the part after /dashboard/
       const pathParts = currentPath.split('/');
-      
-      // Find the dashboard page name
-      // Path structure: /dashboard/page-name
       const dashboardPage = pathParts[2] || '';
       
-      // Find the matching nav item
-      const activeItem = navItems.find(item => item.path === dashboardPage);
-      return activeItem?.id || 'crud-page';
+      // Check if it's a dropdown item
+      if (dashboardPage === 'crud-page' && pathParts[3]) {
+        return pathParts[3]; // Return the specific dropdown item ID
+      }
+      
+      return dashboardPage;
     }
     
-    return 'crud-page'; // Default
+    return 'crud-page';
   };
 
-  // Rest of your component remains the same...
-  // Only update the RouterLink paths to be relative
+  // Get user info from localStorage
+  const getUserInfo = () => {
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        return {
+          name: user.name || user.username || 'User',
+          initials: (user.name || user.username || 'U').charAt(0).toUpperCase(),
+          role: user.is_staff ? 'Administrator' : 'Content Creator'
+        };
+      }
+    } catch (e) {
+      console.error('Error parsing user data:', e);
+    }
+    return {
+      name: 'User',
+      initials: 'U',
+      role: 'Guest'
+    };
+  };
+
+  const userInfo = getUserInfo();
+
+  // Rest of your component...
   return (
     <>
       {/* Mobile Toggle Button */}
@@ -164,13 +231,13 @@ const SideNavComponent = () => {
             <div className="flex items-center space-x-3">
               <div className="relative">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 flex items-center justify-center">
-                  <span className="text-white font-bold">JD</span>
+                  <span className="text-white font-bold">{userInfo.initials}</span>
                 </div>
                 <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white"></div>
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900 truncate">John Doe</h3>
-                <p className="text-xs text-gray-500 truncate">Administrator</p>
+                <h3 className="text-sm font-semibold text-gray-900 truncate">{userInfo.name}</h3>
+                <p className="text-xs text-gray-500 truncate">{userInfo.role}</p>
               </div>
             </div>
           </div>
@@ -180,12 +247,75 @@ const SideNavComponent = () => {
         <div className="flex-1 overflow-y-auto py-4 px-2 custom-scrollbar">
           <nav className="space-y-1">
             {navItems.map((item) => {
-              const isActive = getActiveItem() === item.id;
+              const isActive = getActiveItem() === item.id || 
+                (item.hasDropdown && item.dropdownItems?.some(dropItem => dropItem.id === getActiveItem()));
               
+              if (item.hasDropdown) {
+                return (
+                  <div key={item.id} className="space-y-1">
+                    {/* Dropdown Trigger */}
+                    <button
+                      onClick={toggleDropdown}
+                      className={`flex items-center ${isCollapsed && !isMobile ? 'justify-center' : 'justify-between'} w-full px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 hover:bg-emerald-50 hover:text-emerald-700 hover:shadow-sm ${
+                        isActive 
+                          ? 'bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 border-l-4 border-emerald-500'
+                          : 'text-gray-700 hover:border-l-4 hover:border-emerald-200'
+                      }`}
+                      title={isCollapsed && !isMobile ? item.label : ''}
+                    >
+                      <div className="flex items-center">
+                        <span className={`text-gray-600 ${isActive ? 'text-emerald-600' : ''}`}>
+                          {item.icon}
+                        </span>
+                        {(!isCollapsed || isMobile) && (
+                          <span className="ml-3">{item.label}</span>
+                        )}
+                      </div>
+                      {(!isCollapsed || isMobile) && (
+                        <span className={`transition-transform duration-200 ${expandedDropdown ? 'rotate-180' : ''}`}>
+                          <ExpandMore />
+                        </span>
+                      )}
+                    </button>
+                    
+                    {/* Dropdown Content */}
+                    {(!isCollapsed || isMobile) && expandedDropdown && (
+                      <div className="ml-8 space-y-1 border-l border-emerald-200 pl-2">
+                        {item.dropdownItems.map((dropdownItem) => {
+                          const isDropdownActive = getActiveItem() === dropdownItem.id;
+                          return (
+                            <RouterLink
+                              key={dropdownItem.id}
+                              to={dropdownItem.path}
+                              onClick={() => {
+                                if (isMobile) {
+                                  setIsMobileOpen(false);
+                                }
+                              }}
+                              className={`flex items-center w-full px-3 py-2 text-xs font-medium rounded-lg transition-all duration-200 ${
+                                isDropdownActive
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                              }`}
+                            >
+                              <span className={`mr-2 ${isDropdownActive ? 'text-emerald-600' : 'text-gray-500'}`}>
+                                {dropdownItem.icon}
+                              </span>
+                              <span>{dropdownItem.label}</span>
+                            </RouterLink>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              // Regular navigation item
               return (
                 <RouterLink
                   key={item.id}
-                  to={item.path} // Relative path will be appended to current route
+                  to={item.path}
                   onClick={() => {
                     if (isMobile) {
                       setIsMobileOpen(false);
