@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import axios from 'axios';
 import {
   Save as SaveIcon,
   Publish as PublishIcon,
@@ -28,38 +29,90 @@ import {
   ArrowBack
 } from '@mui/icons-material';
 
-// Mock data for existing blog - in real app, you'd fetch this from API
-const mockBlogData = {
-  id: 1,
-  title: 'Getting Started with React Hooks',
-  slug: 'getting-started-with-react-hooks',
-  excerpt: 'Learn how to use React Hooks in your applications. A comprehensive guide for beginners.',
-  body: '<h1>React Hooks Tutorial</h1>\n<p>React Hooks revolutionized how we write React components...</p>\n<h2>What are React Hooks?</h2>\n<p>React Hooks are functions that let you "hook into" React state and lifecycle features from function components.</p>\n<h2>Benefits of Using Hooks</h2>\n<p>Hooks allow you to reuse stateful logic without changing your component hierarchy...</p>',
-  blog_type: 'blog',
-  status: 'published',
-  seo_title: 'React Hooks Tutorial for Beginners - Complete Guide 2024',
-  meta_description: 'Learn how to use React Hooks in your applications with this comprehensive tutorial. Perfect for beginners looking to master modern React development.',
-  canonical_url: 'https://example.com/blog/react-hooks-tutorial',
-  primary_keyword: 'react hooks',
-  secondary_keywords: ['react', 'javascript', 'tutorial', 'frontend development', 'web development'],
-  search_intent: 'informational',
-  featured_image: null,
-  featured_image_alt: '',
-  scheduled_publish_at: null,
-  is_featured: true,
-  word_count: 850,
-  reading_time_minutes: 5,
-  view_count: 1250,
-  author_name: 'John Doe',
-  published_at: '2024-01-15T09:30:00Z',
-  created_at: '2024-01-10T10:00:00Z',
-  updated_at: '2024-01-14T15:30:00Z',
-  seo_indicators: {
-    seo_score: 78,
-    meta_title_optimal: true,
-    meta_description_optimal: true,
-    has_featured_image: false,
-    reading_time: 5
+// API Configuration
+const API_BASE_URL = 'http://127.0.0.1:8000/blogs/api/';
+
+// Create axios instance
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  }
+});
+
+// Add request interceptor to include auth token
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Helper function to format datetime for HTML input (from ISO to datetime-local)
+const formatDateTimeForInput = (datetimeString) => {
+  if (!datetimeString) return '';
+  
+  try {
+    // If it's already in the right format, return as is
+    if (datetimeString.includes('T') && datetimeString.length === 16) {
+      return datetimeString;
+    }
+    
+    // Parse the ISO datetime string
+    const date = new Date(datetimeString);
+    
+    // Check if date is valid
+    if (isNaN(date.getTime())) {
+      return '';
+    }
+    
+    // Format to YYYY-MM-DDTHH:mm (HTML datetime-local format)
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch (error) {
+    console.error('Error formatting datetime:', error);
+    return '';
+  }
+};
+
+// Helper function to format datetime for API submission (from datetime-local to ISO)
+const formatDateTimeForAPI = (datetimeString) => {
+  if (!datetimeString) return null;
+  
+  try {
+    // If it's already in ISO format, return as is
+    if (datetimeString.includes('T') && datetimeString.length > 19) {
+      return datetimeString;
+    }
+    
+    // Add seconds and timezone if missing
+    let formattedDatetime = datetimeString;
+    if (formattedDatetime.length === 16) {
+      // Add :00 for seconds
+      formattedDatetime += ':00';
+    }
+    
+    // Add Z for UTC timezone if no timezone specified
+    if (!formattedDatetime.includes('+') && !formattedDatetime.includes('Z')) {
+      formattedDatetime += 'Z';
+    }
+    
+    return formattedDatetime;
+  } catch (error) {
+    console.error('Error formatting datetime for API:', error);
+    return datetimeString;
   }
 };
 
@@ -68,30 +121,33 @@ const UpdateBlogPage = () => {
   const { id } = useParams(); // Get blog ID from URL
   const [activeTab, setActiveTab] = useState('content');
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [publishing, setPublishing] = useState(false);
   const [imagePreview, setImagePreview] = useState(null);
   const [versionHistory, setVersionHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
   const [originalData, setOriginalData] = useState(null);
+  const [blogData, setBlogData] = useState(null);
+  const [apiError, setApiError] = useState(null);
   
   // Form state
   const [formData, setFormData] = useState({
     title: '',
     excerpt: '',
-    content: '',
-    blogType: 'blog',
+    body: '',
+    blog_type: 'blog',
     status: 'draft',
-    seoTitle: '',
-    metaDescription: '',
-    primaryKeyword: '',
-    secondaryKeywords: [],
-    searchIntent: 'informational',
-    featuredImage: null,
-    featuredImageAlt: '',
-    internalLinks: [],
-    scheduledPublish: '',
-    isFeatured: false,
-    canonicalUrl: '',
+    seo_title: '',
+    meta_description: '',
+    primary_keyword: '',
+    secondary_keywords: [],
+    search_intent: 'informational',
+    featured_image: null,
+    featured_image_alt: '',
+    internal_links: [],
+    scheduled_publish_at: '',
+    is_featured: false,
+    canonical_url: '',
   });
 
   // Validation errors
@@ -100,77 +156,111 @@ const UpdateBlogPage = () => {
   // Load blog data on component mount
   useEffect(() => {
     const loadBlogData = async () => {
-      // In real app: fetch blog data from API using the id
-      console.log('Loading blog with ID:', id);
-      
-      // Use mock data for now
-      const blogData = mockBlogData;
-      
-      setOriginalData(blogData);
-      
-      // Transform API data to form state
-      setFormData({
-        title: blogData.title || '',
-        excerpt: blogData.excerpt || '',
-        content: blogData.body || '',
-        blogType: blogData.blog_type || 'blog',
-        status: blogData.status || 'draft',
-        seoTitle: blogData.seo_title || '',
-        metaDescription: blogData.meta_description || '',
-        primaryKeyword: blogData.primary_keyword || '',
-        secondaryKeywords: blogData.secondary_keywords || [],
-        searchIntent: blogData.search_intent || 'informational',
-        featuredImage: blogData.featured_image,
-        featuredImageAlt: blogData.featured_image_alt || '',
-        internalLinks: blogData.internal_links || [],
-        scheduledPublish: blogData.scheduled_publish_at || '',
-        isFeatured: blogData.is_featured || false,
-        canonicalUrl: blogData.canonical_url || '',
-      });
+      try {
+        setLoading(true);
+        setApiError(null);
+        
+        console.log('Loading blog with ID:', id);
+        
+        // Fetch blog data from API
+        const response = await api.get(`blogs/${id}/`);
+        const blogData = response.data.blog; // Extract the blog object from response
+        
+        console.log('Blog data loaded:', blogData);
+        
+        setBlogData(blogData);
+        setOriginalData(blogData);
+        
+        // Format scheduled_publish_at for HTML input
+        const formattedScheduledDate = blogData.scheduled_publish_at 
+          ? formatDateTimeForInput(blogData.scheduled_publish_at)
+          : '';
+        
+        // Transform API data to form state
+        setFormData({
+          title: blogData.title || '',
+          excerpt: blogData.excerpt || '',
+          body: blogData.body || '',
+          blog_type: blogData.blog_type || 'blog',
+          status: blogData.status || 'draft',
+          seo_title: blogData.seo_title || '',
+          meta_description: blogData.meta_description || '',
+          primary_keyword: blogData.primary_keyword || '',
+          secondary_keywords: blogData.secondary_keywords || [],
+          search_intent: blogData.search_intent || 'informational',
+          featured_image: blogData.featured_image, // Keep as URL string for now
+          featured_image_alt: blogData.featured_image_alt || '',
+          internal_links: blogData.internal_links || [],
+          scheduled_publish_at: formattedScheduledDate,
+          is_featured: blogData.is_featured || false,
+          canonical_url: blogData.canonical_url || '',
+        });
 
-      // Load mock version history
-      setVersionHistory([
-        {
-          id: 1,
-          version: '2.0',
-          date: '2024-01-14T15:30:00Z',
-          author: 'John Doe',
-          changes: ['Updated content', 'Added new sections', 'Fixed typos'],
-          content: blogData.body
-        },
-        {
-          id: 2,
-          version: '1.0',
-          date: '2024-01-10T10:00:00Z',
-          author: 'John Doe',
-          changes: ['Initial draft'],
-          content: '<h1>Initial Draft</h1><p>First version of the article...</p>'
+        // Set image preview if exists
+        if (blogData.image_url) {
+          setImagePreview(blogData.image_url);
+        } else if (blogData.featured_image) {
+          setImagePreview(blogData.featured_image);
         }
-      ]);
+
+        // Load mock version history
+        setVersionHistory([
+          {
+            id: 1,
+            version: '2.0',
+            date: blogData.updated_at || new Date().toISOString(),
+            author: blogData.author_name || blogData.user?.first_name + ' ' + blogData.user?.last_name || 'Unknown',
+            changes: ['Updated content', 'Added new sections', 'Fixed typos'],
+            content: blogData.body || ''
+          },
+          {
+            id: 2,
+            version: '1.0',
+            date: blogData.created_at || new Date().toISOString(),
+            author: blogData.author_name || blogData.user?.first_name + ' ' + blogData.user?.last_name || 'Unknown',
+            changes: ['Initial draft'],
+            content: blogData.body || ''
+          }
+        ]);
+        
+      } catch (error) {
+        console.error('Error loading blog data:', error);
+        setApiError(error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to load blog data');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    loadBlogData();
+    if (id) {
+      loadBlogData();
+    }
   }, [id]);
 
   // Check if form has changes
   const hasChanges = () => {
     if (!originalData) return false;
     
+    // Compare current form data with original data
+    // Need to handle scheduled_publish_at specially since we format it differently
+    const originalScheduledDate = originalData.scheduled_publish_at 
+      ? formatDateTimeForInput(originalData.scheduled_publish_at)
+      : '';
+    
     return (
       formData.title !== originalData.title ||
       formData.excerpt !== originalData.excerpt ||
-      formData.content !== originalData.body ||
-      formData.blogType !== originalData.blog_type ||
+      formData.body !== originalData.body ||
+      formData.blog_type !== originalData.blog_type ||
       formData.status !== originalData.status ||
-      formData.seoTitle !== originalData.seo_title ||
-      formData.metaDescription !== originalData.meta_description ||
-      formData.primaryKeyword !== originalData.primary_keyword ||
-      JSON.stringify(formData.secondaryKeywords) !== JSON.stringify(originalData.secondary_keywords) ||
-      formData.searchIntent !== originalData.search_intent ||
-      formData.featuredImageAlt !== originalData.featured_image_alt ||
-      formData.scheduledPublish !== originalData.scheduled_publish_at ||
-      formData.isFeatured !== originalData.is_featured ||
-      formData.canonicalUrl !== originalData.canonical_url
+      formData.seo_title !== originalData.seo_title ||
+      formData.meta_description !== originalData.meta_description ||
+      formData.primary_keyword !== originalData.primary_keyword ||
+      JSON.stringify(formData.secondary_keywords) !== JSON.stringify(originalData.secondary_keywords) ||
+      formData.search_intent !== originalData.search_intent ||
+      formData.featured_image_alt !== originalData.featured_image_alt ||
+      formData.scheduled_publish_at !== originalScheduledDate ||
+      formData.is_featured !== originalData.is_featured ||
+      formData.canonical_url !== originalData.canonical_url
     );
   };
 
@@ -196,7 +286,7 @@ const UpdateBlogPage = () => {
       if (!validTypes.includes(file.type)) {
         setErrors(prev => ({ 
           ...prev, 
-          featuredImage: 'Please upload a valid image (JPEG, PNG, GIF, WebP)' 
+          featured_image: 'Please upload a valid image (JPEG, PNG, GIF, WebP)' 
         }));
         return;
       }
@@ -205,12 +295,12 @@ const UpdateBlogPage = () => {
       if (file.size > 5 * 1024 * 1024) {
         setErrors(prev => ({ 
           ...prev, 
-          featuredImage: 'Image size should be less than 5MB' 
+          featured_image: 'Image size should be less than 5MB' 
         }));
         return;
       }
 
-      setFormData(prev => ({ ...prev, featuredImage: file }));
+      setFormData(prev => ({ ...prev, featured_image: file }));
       
       // Create preview
       const reader = new FileReader();
@@ -220,14 +310,14 @@ const UpdateBlogPage = () => {
       reader.readAsDataURL(file);
       
       // Clear error
-      if (errors.featuredImage) {
-        setErrors(prev => ({ ...prev, featuredImage: '' }));
+      if (errors.featured_image) {
+        setErrors(prev => ({ ...prev, featured_image: '' }));
       }
     }
   };
 
   const removeImage = () => {
-    setFormData(prev => ({ ...prev, featuredImage: null, featuredImageAlt: '' }));
+    setFormData(prev => ({ ...prev, featured_image: null, featured_image_alt: '' }));
     setImagePreview(null);
   };
 
@@ -236,7 +326,7 @@ const UpdateBlogPage = () => {
     if (keyword && keyword.trim()) {
       setFormData(prev => ({
         ...prev,
-        secondaryKeywords: [...prev.secondaryKeywords, keyword.trim()]
+        secondary_keywords: [...prev.secondary_keywords, keyword.trim()]
       }));
     }
   };
@@ -244,7 +334,7 @@ const UpdateBlogPage = () => {
   const removeSecondaryKeyword = (index) => {
     setFormData(prev => ({
       ...prev,
-      secondaryKeywords: prev.secondaryKeywords.filter((_, i) => i !== index)
+      secondary_keywords: prev.secondary_keywords.filter((_, i) => i !== index)
     }));
   };
 
@@ -257,20 +347,20 @@ const UpdateBlogPage = () => {
     };
     setFormData(prev => ({
       ...prev,
-      internalLinks: [...prev.internalLinks, newLink]
+      internal_links: [...prev.internal_links, newLink]
     }));
   };
 
   const updateInternalLink = (index, field, value) => {
-    const updatedLinks = [...formData.internalLinks];
+    const updatedLinks = [...formData.internal_links];
     updatedLinks[index][field] = value;
-    setFormData(prev => ({ ...prev, internalLinks: updatedLinks }));
+    setFormData(prev => ({ ...prev, internal_links: updatedLinks }));
   };
 
   const removeInternalLink = (index) => {
     setFormData(prev => ({
       ...prev,
-      internalLinks: prev.internalLinks.filter((_, i) => i !== index)
+      internal_links: prev.internal_links.filter((_, i) => i !== index)
     }));
   };
 
@@ -278,7 +368,7 @@ const UpdateBlogPage = () => {
     if (window.confirm(`Restore to version ${version.version}? This will replace your current content.`)) {
       setFormData(prev => ({
         ...prev,
-        content: version.content
+        body: version.content
       }));
       setShowHistory(false);
       alert(`Restored to version ${version.version}`);
@@ -292,21 +382,21 @@ const UpdateBlogPage = () => {
     if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (formData.title.length > 200) newErrors.title = 'Title should be less than 200 characters';
     
-    if (!formData.content.trim()) newErrors.content = 'Content is required';
-    if (formData.content.length < 100) newErrors.content = 'Content should be at least 100 characters';
+    if (!formData.body.trim()) newErrors.body = 'Content is required';
+    if (formData.body.length < 100) newErrors.body = 'Content should be at least 100 characters';
     
-    if (formData.seoTitle && formData.seoTitle.length > 60) {
-      newErrors.seoTitle = 'SEO title should be 60 characters or less';
+    if (formData.seo_title && formData.seo_title.length > 60) {
+      newErrors.seo_title = 'SEO title should be 60 characters or less';
     }
     
-    if (formData.metaDescription && formData.metaDescription.length > 160) {
-      newErrors.metaDescription = 'Meta description should be 160 characters or less';
+    if (formData.meta_description && formData.meta_description.length > 160) {
+      newErrors.meta_description = 'Meta description should be 160 characters or less';
     }
     
-    if (!formData.primaryKeyword.trim()) newErrors.primaryKeyword = 'Primary keyword is required';
+    if (!formData.primary_keyword.trim()) newErrors.primary_keyword = 'Primary keyword is required';
     
-    if (formData.status === 'scheduled' && !formData.scheduledPublish) {
-      newErrors.scheduledPublish = 'Scheduled publish date is required';
+    if (formData.status === 'scheduled' && !formData.scheduled_publish_at) {
+      newErrors.scheduled_publish_at = 'Scheduled publish date is required';
     }
     
     setErrors(newErrors);
@@ -318,12 +408,12 @@ const UpdateBlogPage = () => {
     const analysis = {
       titleLength: formData.title.length,
       titleOptimal: formData.title.length >= 50 && formData.title.length <= 60,
-      descriptionLength: formData.metaDescription.length,
-      descriptionOptimal: formData.metaDescription.length >= 120 && formData.metaDescription.length <= 160,
-      hasImage: !!formData.featuredImage,
-      hasImageAlt: !!formData.featuredImageAlt,
-      wordCount: formData.content.split(/\s+/).filter(word => word.length > 0).length,
-      readingTime: Math.max(1, Math.floor(formData.content.split(/\s+/).filter(word => word.length > 0).length / 200)),
+      descriptionLength: formData.meta_description.length,
+      descriptionOptimal: formData.meta_description.length >= 120 && formData.meta_description.length <= 160,
+      hasImage: !!formData.featured_image || !!imagePreview,
+      hasImageAlt: !!formData.featured_image_alt,
+      wordCount: formData.body.split(/\s+/).filter(word => word.length > 0).length,
+      readingTime: Math.max(1, Math.floor(formData.body.split(/\s+/).filter(word => word.length > 0).length / 200)),
     };
 
     // Calculate SEO score
@@ -333,8 +423,8 @@ const UpdateBlogPage = () => {
     if (analysis.hasImage) score += 10;
     if (analysis.hasImageAlt) score += 10;
     if (analysis.wordCount >= 300) score += 20;
-    if (formData.primaryKeyword) score += 10;
-    if (formData.secondaryKeywords.length > 0) score += 10;
+    if (formData.primary_keyword) score += 10;
+    if (formData.secondary_keywords.length > 0) score += 10;
 
     analysis.seoScore = Math.min(100, score);
     analysis.seoLevel = analysis.seoScore >= 80 ? 'Excellent' : 
@@ -346,96 +436,250 @@ const UpdateBlogPage = () => {
 
   const seoAnalysis = getSeoAnalysis();
 
-  // Save handlers
-  const handleSaveDraft = async () => {
-    if (!validateForm()) {
-      alert('Please fix the errors before saving');
-      return;
-    }
-
-    setSaving(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    console.log('Updating draft:', {
-      id,
-      ...formData,
-      status: 'draft'
-    });
-    
-    setSaving(false);
-    alert('Draft updated successfully!');
-  };
-
-  const handleUpdate = async () => {
+  // Handle form submission for updating blog
+  const handleUpdateBlog = async (status = null) => {
     if (!validateForm()) {
       alert('Please fix the errors before updating');
       return;
     }
 
-    setPublishing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    console.log('Updating blog:', {
-      id,
-      ...formData,
-      status: formData.status === 'draft' ? 'draft' : formData.status,
-      updated_at: new Date().toISOString()
-    });
-    
-    setPublishing(false);
-    alert('Blog updated successfully!');
-    navigate('/dashboard/crud-page/view-blog');
+    try {
+      setPublishing(true);
+      setApiError(null);
+      
+      // Prepare form data - create a new object to avoid mutating formData
+      const updateData = {
+        title: formData.title,
+        excerpt: formData.excerpt,
+        body: formData.body,
+        blog_type: formData.blog_type,
+        status: status || formData.status,
+        seo_title: formData.seo_title,
+        meta_description: formData.meta_description,
+        primary_keyword: formData.primary_keyword,
+        secondary_keywords: formData.secondary_keywords,
+        search_intent: formData.search_intent,
+        featured_image_alt: formData.featured_image_alt,
+        internal_links: formData.internal_links,
+        is_featured: formData.is_featured,
+        canonical_url: formData.canonical_url,
+      };
+      
+      // Format scheduled_publish_at for API
+      if (formData.scheduled_publish_at) {
+        updateData.scheduled_publish_at = formatDateTimeForAPI(formData.scheduled_publish_at);
+      } else {
+        updateData.scheduled_publish_at = null;
+      }
+      
+      // Handle featured_image - only send if it's a File object (new upload)
+      if (formData.featured_image && typeof formData.featured_image !== 'string') {
+        // If it's a File object, we need to use FormData
+        const formDataToSend = new FormData();
+        
+        // Append all fields to FormData
+        Object.keys(updateData).forEach(key => {
+          if (updateData[key] !== null && updateData[key] !== undefined) {
+            if (key === 'secondary_keywords' || key === 'internal_links') {
+              // Stringify arrays
+              formDataToSend.append(key, JSON.stringify(updateData[key]));
+            } else {
+              formDataToSend.append(key, updateData[key]);
+            }
+          }
+        });
+        
+        // Append the image file
+        formDataToSend.append('featured_image', formData.featured_image);
+        
+        console.log('Updating blog with FormData:', Object.fromEntries(formDataToSend));
+        
+        // Update headers for multipart/form-data
+        const config = {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+          }
+        };
+        
+        // Call update API with FormData
+        const response = await api.put(`blogs/${id}/update/`, formDataToSend, config);
+        console.log('Blog updated successfully:', response.data);
+      } else {
+        // No file upload, send as JSON
+        console.log('Updating blog with JSON data:', updateData);
+        
+        // Call update API with JSON
+        const response = await api.put(`blogs/${id}/update/`, updateData);
+        console.log('Blog updated successfully:', response.data);
+      }
+      
+      setPublishing(false);
+      alert('Blog updated successfully!');
+      navigate('../view-blog');
+      
+    } catch (error) {
+      console.error('Error updating blog:', error);
+      setApiError(error.response?.data?.message || error.response?.data?.error || error.message || 'Failed to update blog');
+      setPublishing(false);
+    }
   };
 
+  // Handle save as draft
+  const handleSaveDraft = async () => {
+    setSaving(true);
+    try {
+      await handleUpdateBlog('draft');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Handle schedule
   const handleSchedule = async () => {
-    if (!validateForm()) {
-      alert('Please fix the errors before scheduling');
+    if (!formData.scheduled_publish_at) {
+      setErrors(prev => ({ ...prev, scheduled_publish_at: 'Please select a publish date' }));
       return;
     }
-
-    if (!formData.scheduledPublish) {
-      setErrors(prev => ({ ...prev, scheduledPublish: 'Please select a publish date' }));
-      return;
+    
+    try {
+      await handleUpdateBlog('scheduled');
+    } catch (error) {
+      console.error('Error scheduling blog:', error);
     }
+  };
 
-    setPublishing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    console.log('Scheduling update:', {
-      id,
-      ...formData,
-      status: 'scheduled',
-      scheduled_publish_at: formData.scheduledPublish
-    });
-    
-    setPublishing(false);
-    alert('Blog scheduled successfully!');
-    navigate('/dashboard/crud-page/view-blog');
+  // Handle publish
+  const handlePublish = async () => {
+    try {
+      await handleUpdateBlog('published');
+    } catch (error) {
+      console.error('Error publishing blog:', error);
+    }
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (e) {
+      return 'Invalid date';
+    }
   };
+
+  // Reset form to original data
+  const resetFormData = () => {
+    if (window.confirm('Reset all changes?')) {
+      const formattedScheduledDate = originalData?.scheduled_publish_at 
+        ? formatDateTimeForInput(originalData.scheduled_publish_at)
+        : '';
+      
+      setFormData({
+        title: originalData?.title || '',
+        excerpt: originalData?.excerpt || '',
+        body: originalData?.body || '',
+        blog_type: originalData?.blog_type || 'blog',
+        status: originalData?.status || 'draft',
+        seo_title: originalData?.seo_title || '',
+        meta_description: originalData?.meta_description || '',
+        primary_keyword: originalData?.primary_keyword || '',
+        secondary_keywords: originalData?.secondary_keywords || [],
+        search_intent: originalData?.search_intent || 'informational',
+        featured_image: originalData?.featured_image,
+        featured_image_alt: originalData?.featured_image_alt || '',
+        internal_links: originalData?.internal_links || [],
+        scheduled_publish_at: formattedScheduledDate,
+        is_featured: originalData?.is_featured || false,
+        canonical_url: originalData?.canonical_url || '',
+      });
+      
+      if (originalData?.image_url) {
+        setImagePreview(originalData.image_url);
+      } else if (originalData?.featured_image) {
+        setImagePreview(originalData.featured_image);
+      }
+    }
+  };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-emerald-50/30 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading blog data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (apiError && !blogData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-emerald-50/30 p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 rounded-xl shadow-lg p-6 border border-red-200">
+            <div className="flex items-center">
+              <Error className="w-8 h-8 text-red-600 mr-4" />
+              <div>
+                <h2 className="text-xl font-bold text-red-800">Failed to Load Blog</h2>
+                <p className="text-red-600 mt-2">{apiError}</p>
+              </div>
+            </div>
+            <div className="mt-6 flex gap-3">
+              <button
+                onClick={() => navigate('../view-blog')}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              >
+                Back to Blog List
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 transition-colors"
+              >
+                Retry Loading
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-emerald-50/30">
       <div className="p-6">
+        {/* API Error Display */}
+        {apiError && (
+          <div className="mb-6 bg-gradient-to-r from-red-50 to-pink-50 rounded-xl p-4 border border-red-200">
+            <div className="flex items-center">
+              <Error className="w-5 h-5 text-red-600 mr-3" />
+              <div className="flex-1">
+                <p className="font-medium text-red-800">API Error</p>
+                <p className="text-sm text-red-600 mt-1">{apiError}</p>
+              </div>
+              <button
+                onClick={() => setApiError(null)}
+                className="text-sm font-medium text-red-600 hover:text-red-800"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
             <div className="flex items-center">
               <button
-                onClick={() => navigate('/dashboard/crud-page/view-blog')}
+                onClick={() => navigate('../view-blog')}
                 className="mr-4 p-2 rounded-lg bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
               >
                 <ArrowBack className="w-5 h-5 text-gray-600" />
@@ -452,14 +696,15 @@ const UpdateBlogPage = () => {
             
             {/* Action Buttons */}
             <div className="flex flex-wrap gap-3 mt-4 sm:mt-0">
-              <button
-                onClick={() => navigate(`/blog/${mockBlogData.slug}`)}
-                target="_blank"
-                className="inline-flex items-center px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200"
-              >
-                <Visibility className="w-5 h-5 mr-2" />
-                View Live
-              </button>
+              {blogData?.slug && (
+                <button
+                  onClick={() => window.open(`/blog/${blogData.slug}`, '_blank')}
+                  className="inline-flex items-center px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200"
+                >
+                  <Visibility className="w-5 h-5 mr-2" />
+                  View Live
+                </button>
+              )}
               
               <button
                 onClick={handleSaveDraft}
@@ -479,7 +724,7 @@ const UpdateBlogPage = () => {
                 )}
               </button>
               
-              {formData.status === 'scheduled' ? (
+              {formData.status === 'scheduled' || formData.status === 'draft' ? (
                 <button
                   onClick={handleSchedule}
                   disabled={publishing || !hasChanges()}
@@ -499,7 +744,7 @@ const UpdateBlogPage = () => {
                 </button>
               ) : (
                 <button
-                  onClick={handleUpdate}
+                  onClick={handlePublish}
                   disabled={publishing || !hasChanges()}
                   className="inline-flex items-center px-4 py-2.5 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-emerald-700 to-teal-400 hover:from-emerald-800 hover:to-teal-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -527,15 +772,15 @@ const UpdateBlogPage = () => {
                 <div className="space-y-2">
                   <div className="flex items-center text-sm">
                     <span className="text-gray-500 w-24">ID:</span>
-                    <span className="font-medium text-gray-900">#{mockBlogData.id}</span>
+                    <span className="font-medium text-gray-900">#{blogData?.id}</span>
                   </div>
                   <div className="flex items-center text-sm">
                     <span className="text-gray-500 w-24">Slug:</span>
-                    <span className="font-medium text-gray-900">{mockBlogData.slug}</span>
+                    <span className="font-medium text-gray-900">{blogData?.slug}</span>
                   </div>
                   <div className="flex items-center text-sm">
                     <span className="text-gray-500 w-24">Views:</span>
-                    <span className="font-medium text-emerald-700">{mockBlogData.view_count.toLocaleString()}</span>
+                    <span className="font-medium text-emerald-700">{blogData?.view_count?.toLocaleString() || 0}</span>
                   </div>
                 </div>
               </div>
@@ -545,15 +790,15 @@ const UpdateBlogPage = () => {
                 <div className="space-y-2">
                   <div className="flex items-center text-sm">
                     <span className="text-gray-500 w-24">Created:</span>
-                    <span className="font-medium text-gray-900">{formatDate(mockBlogData.created_at)}</span>
+                    <span className="font-medium text-gray-900">{formatDate(blogData?.created_at)}</span>
                   </div>
                   <div className="flex items-center text-sm">
                     <span className="text-gray-500 w-24">Updated:</span>
-                    <span className="font-medium text-gray-900">{formatDate(mockBlogData.updated_at)}</span>
+                    <span className="font-medium text-gray-900">{formatDate(blogData?.updated_at)}</span>
                   </div>
                   <div className="flex items-center text-sm">
                     <span className="text-gray-500 w-24">Published:</span>
-                    <span className="font-medium text-gray-900">{formatDate(mockBlogData.published_at)}</span>
+                    <span className="font-medium text-gray-900">{formatDate(blogData?.published_at)}</span>
                   </div>
                 </div>
               </div>
@@ -569,28 +814,7 @@ const UpdateBlogPage = () => {
                     Version History ({versionHistory.length})
                   </button>
                   <button
-                    onClick={() => {
-                      if (window.confirm('Reset all changes?')) {
-                        setFormData({
-                          title: originalData?.title || '',
-                          excerpt: originalData?.excerpt || '',
-                          content: originalData?.body || '',
-                          blogType: originalData?.blog_type || 'blog',
-                          status: originalData?.status || 'draft',
-                          seoTitle: originalData?.seo_title || '',
-                          metaDescription: originalData?.meta_description || '',
-                          primaryKeyword: originalData?.primary_keyword || '',
-                          secondaryKeywords: originalData?.secondary_keywords || [],
-                          searchIntent: originalData?.search_intent || 'informational',
-                          featuredImage: originalData?.featured_image,
-                          featuredImageAlt: originalData?.featured_image_alt || '',
-                          internalLinks: originalData?.internal_links || [],
-                          scheduledPublish: originalData?.scheduled_publish_at || '',
-                          isFeatured: originalData?.is_featured || false,
-                          canonicalUrl: originalData?.canonical_url || '',
-                        });
-                      }
-                    }}
+                    onClick={resetFormData}
                     disabled={!hasChanges()}
                     className="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -624,8 +848,8 @@ const UpdateBlogPage = () => {
                     Blog Type
                   </label>
                   <select
-                    name="blogType"
-                    value={formData.blogType}
+                    name="blog_type"
+                    value={formData.blog_type}
                     onChange={handleInputChange}
                     className="block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white"
                   >
@@ -657,14 +881,14 @@ const UpdateBlogPage = () => {
                 <div className="flex items-center">
                   <input
                     type="checkbox"
-                    id="isFeatured"
-                    name="isFeatured"
-                    checked={formData.isFeatured}
+                    id="is_featured"
+                    name="is_featured"
+                    checked={formData.is_featured}
                     onChange={handleInputChange}
                     className="h-4 w-4 text-yellow-500 focus:ring-yellow-400 border-gray-300 rounded"
                   />
-                  <label htmlFor="isFeatured" className="ml-2 flex items-center text-sm text-gray-700">
-                    {formData.isFeatured ? (
+                  <label htmlFor="is_featured" className="ml-2 flex items-center text-sm text-gray-700">
+                    {formData.is_featured ? (
                       <Star className="w-4 h-4 text-yellow-500 mr-1" />
                     ) : (
                       <StarBorder className="w-4 h-4 text-gray-400 mr-1" />
@@ -682,13 +906,13 @@ const UpdateBlogPage = () => {
                   </label>
                   <input
                     type="datetime-local"
-                    name="scheduledPublish"
-                    value={formData.scheduledPublish}
+                    name="scheduled_publish_at"
+                    value={formData.scheduled_publish_at}
                     onChange={handleInputChange}
-                    className={`block w-full border ${errors.scheduledPublish ? 'border-red-300' : 'border-gray-300'} rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white`}
+                    className={`block w-full border ${errors.scheduled_publish_at ? 'border-red-300' : 'border-gray-300'} rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white`}
                   />
-                  {errors.scheduledPublish && (
-                    <p className="mt-1 text-xs text-red-600">{errors.scheduledPublish}</p>
+                  {errors.scheduled_publish_at && (
+                    <p className="mt-1 text-xs text-red-600">{errors.scheduled_publish_at}</p>
                   )}
                 </div>
               )}
@@ -699,13 +923,6 @@ const UpdateBlogPage = () => {
         {/* Version History Modal */}
         {showHistory && (
           <div className="fixed inset-0 z-50 flex items-center justify-center">
-            {/* Backdrop */}
-            <div 
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-all duration-300"
-              onClick={() => setShowHistory(false)}
-            />
-            
-            {/* Modal */}
             <div className="relative z-10 bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
               <div className="bg-gradient-to-r from-emerald-50 to-teal-50 px-6 py-4 border-b border-emerald-100">
                 <div className="flex items-center justify-between">
@@ -852,20 +1069,20 @@ const UpdateBlogPage = () => {
                         Content *
                       </label>
                       <textarea
-                        name="content"
-                        value={formData.content}
+                        name="body"
+                        value={formData.body}
                         onChange={handleInputChange}
                         rows="12"
                         placeholder="Write your blog content here. You can use HTML tags for formatting."
-                        className={`block w-full border ${errors.content ? 'border-red-300' : 'border-gray-300'} rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white font-mono`}
+                        className={`block w-full border ${errors.body ? 'border-red-300' : 'border-gray-300'} rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white font-mono`}
                       />
-                      {errors.content && (
-                        <p className="mt-2 text-sm text-red-600">{errors.content}</p>
+                      {errors.body && (
+                        <p className="mt-2 text-sm text-red-600">{errors.body}</p>
                       )}
                       <div className="mt-2 flex flex-wrap justify-between text-xs text-gray-500">
                         <div className="flex space-x-4">
                           <span>Words: {seoAnalysis.wordCount}</span>
-                          <span>Characters: {formData.content.length}</span>
+                          <span>Characters: {formData.body.length}</span>
                           <span>Reading Time: {seoAnalysis.readingTime} min</span>
                         </div>
                         <span className={seoAnalysis.wordCount >= 300 ? 'text-emerald-600' : 'text-amber-600'}>
@@ -887,17 +1104,17 @@ const UpdateBlogPage = () => {
                       </label>
                       <input
                         type="text"
-                        name="seoTitle"
-                        value={formData.seoTitle}
+                        name="seo_title"
+                        value={formData.seo_title}
                         onChange={handleInputChange}
                         placeholder="Custom SEO title (defaults to blog title)"
-                        className={`block w-full border ${errors.seoTitle ? 'border-red-300' : 'border-gray-300'} rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white`}
+                        className={`block w-full border ${errors.seo_title ? 'border-red-300' : 'border-gray-300'} rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white`}
                       />
-                      {errors.seoTitle && (
-                        <p className="mt-2 text-sm text-red-600">{errors.seoTitle}</p>
+                      {errors.seo_title && (
+                        <p className="mt-2 text-sm text-red-600">{errors.seo_title}</p>
                       )}
                       <div className="mt-2 flex justify-between text-xs text-gray-500">
-                        <span>{formData.seoTitle.length}/60 characters</span>
+                        <span>{formData.seo_title.length}/60 characters</span>
                         <span className={seoAnalysis.titleOptimal ? 'text-emerald-600' : 'text-amber-600'}>
                           {seoAnalysis.titleOptimal ? '✓ Optimal' : '50-60 chars recommended'}
                         </span>
@@ -911,18 +1128,18 @@ const UpdateBlogPage = () => {
                         Meta Description
                       </label>
                       <textarea
-                        name="metaDescription"
-                        value={formData.metaDescription}
+                        name="meta_description"
+                        value={formData.meta_description}
                         onChange={handleInputChange}
                         rows="3"
                         placeholder="Write a compelling meta description for search engines"
-                        className={`block w-full border ${errors.metaDescription ? 'border-red-300' : 'border-gray-300'} rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white`}
+                        className={`block w-full border ${errors.meta_description ? 'border-red-300' : 'border-gray-300'} rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white`}
                       />
-                      {errors.metaDescription && (
-                        <p className="mt-2 text-sm text-red-600">{errors.metaDescription}</p>
+                      {errors.meta_description && (
+                        <p className="mt-2 text-sm text-red-600">{errors.meta_description}</p>
                       )}
                       <div className="mt-2 flex justify-between text-xs text-gray-500">
-                        <span>{formData.metaDescription.length}/160 characters</span>
+                        <span>{formData.meta_description.length}/160 characters</span>
                         <span className={seoAnalysis.descriptionOptimal ? 'text-emerald-600' : 'text-amber-600'}>
                           {seoAnalysis.descriptionOptimal ? '✓ Optimal' : '120-160 chars recommended'}
                         </span>
@@ -937,14 +1154,14 @@ const UpdateBlogPage = () => {
                       </label>
                       <input
                         type="text"
-                        name="primaryKeyword"
-                        value={formData.primaryKeyword}
+                        name="primary_keyword"
+                        value={formData.primary_keyword}
                         onChange={handleInputChange}
                         placeholder="Enter the main keyword for SEO"
-                        className={`block w-full border ${errors.primaryKeyword ? 'border-red-300' : 'border-gray-300'} rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white`}
+                        className={`block w-full border ${errors.primary_keyword ? 'border-red-300' : 'border-gray-300'} rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white`}
                       />
-                      {errors.primaryKeyword && (
-                        <p className="mt-2 text-sm text-red-600">{errors.primaryKeyword}</p>
+                      {errors.primary_keyword && (
+                        <p className="mt-2 text-sm text-red-600">{errors.primary_keyword}</p>
                       )}
                     </div>
 
@@ -964,7 +1181,7 @@ const UpdateBlogPage = () => {
                         </button>
                       </div>
                       <div className="space-y-2">
-                        {formData.secondaryKeywords.map((keyword, index) => (
+                        {formData.secondary_keywords.map((keyword, index) => (
                           <div key={index} className="flex items-center">
                             <input
                               type="text"
@@ -981,7 +1198,7 @@ const UpdateBlogPage = () => {
                             </button>
                           </div>
                         ))}
-                        {formData.secondaryKeywords.length === 0 && (
+                        {formData.secondary_keywords.length === 0 && (
                           <p className="text-sm text-gray-500 italic py-2">
                             No secondary keywords added yet
                           </p>
@@ -995,8 +1212,8 @@ const UpdateBlogPage = () => {
                         Search Intent
                       </label>
                       <select
-                        name="searchIntent"
-                        value={formData.searchIntent}
+                        name="search_intent"
+                        value={formData.search_intent}
                         onChange={handleInputChange}
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-3 px-4 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white"
                       >
@@ -1042,13 +1259,13 @@ const UpdateBlogPage = () => {
                             </label>
                             <input
                               type="text"
-                              name="featuredImageAlt"
-                              value={formData.featuredImageAlt}
+                              name="featured_image_alt"
+                              value={formData.featured_image_alt}
                               onChange={handleInputChange}
                               placeholder="Describe the image for accessibility and SEO"
                               className="block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white"
                             />
-                            {!formData.featuredImageAlt && (
+                            {!formData.featured_image_alt && (
                               <p className="mt-1 text-xs text-amber-600">
                                 Alt text is required for accessibility
                               </p>
@@ -1059,12 +1276,12 @@ const UpdateBlogPage = () => {
                         <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-emerald-400 transition-colors">
                           <input
                             type="file"
-                            id="featuredImage"
+                            id="featured_image"
                             accept="image/*"
                             onChange={handleImageUpload}
                             className="hidden"
                           />
-                          <label htmlFor="featuredImage" className="cursor-pointer">
+                          <label htmlFor="featured_image" className="cursor-pointer">
                             <div className="flex flex-col items-center">
                               <AddPhotoAlternate className="w-12 h-12 text-gray-400 mb-3" />
                               <p className="text-sm font-medium text-gray-700 mb-1">
@@ -1077,8 +1294,8 @@ const UpdateBlogPage = () => {
                           </label>
                         </div>
                       )}
-                      {errors.featuredImage && (
-                        <p className="mt-2 text-sm text-red-600">{errors.featuredImage}</p>
+                      {errors.featured_image && (
+                        <p className="mt-2 text-sm text-red-600">{errors.featured_image}</p>
                       )}
                     </div>
 
@@ -1090,8 +1307,8 @@ const UpdateBlogPage = () => {
                       </label>
                       <input
                         type="url"
-                        name="canonicalUrl"
-                        value={formData.canonicalUrl}
+                        name="canonical_url"
+                        value={formData.canonical_url}
                         onChange={handleInputChange}
                         placeholder="https://example.com/original-post-url"
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 text-sm bg-white"
@@ -1118,7 +1335,7 @@ const UpdateBlogPage = () => {
                       </div>
                       
                       <div className="space-y-3">
-                        {formData.internalLinks.map((link, index) => (
+                        {formData.internal_links.map((link, index) => (
                           <div key={link.id} className="p-3 border border-gray-200 rounded-lg bg-gray-50">
                             <div className="grid grid-cols-2 gap-3 mb-2">
                               <div>
@@ -1170,7 +1387,7 @@ const UpdateBlogPage = () => {
                           </div>
                         ))}
                         
-                        {formData.internalLinks.length === 0 && (
+                        {formData.internal_links.length === 0 && (
                           <p className="text-sm text-gray-500 italic py-4 text-center border-2 border-dashed border-gray-200 rounded-lg">
                             No internal links added yet
                           </p>
@@ -1290,7 +1507,7 @@ const UpdateBlogPage = () => {
                     <span className={`text-sm font-medium ${
                       seoAnalysis.descriptionOptimal ? 'text-emerald-600' : 'text-amber-600'
                     }`}>
-                      {formData.metaDescription.length}/160
+                      {formData.meta_description.length}/160
                     </span>
                   </div>
 
@@ -1376,7 +1593,7 @@ const UpdateBlogPage = () => {
                     {saving ? 'Saving...' : 'Save as Draft'}
                   </button>
                   
-                  {formData.status === 'scheduled' ? (
+                  {formData.status === 'scheduled' || formData.status === 'draft' ? (
                     <button
                       onClick={handleSchedule}
                       disabled={publishing || !hasChanges()}
@@ -1387,7 +1604,7 @@ const UpdateBlogPage = () => {
                     </button>
                   ) : (
                     <button
-                      onClick={handleUpdate}
+                      onClick={handlePublish}
                       disabled={publishing || !hasChanges()}
                       className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-emerald-700 to-teal-400 hover:from-emerald-800 hover:to-teal-500 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -1405,7 +1622,7 @@ const UpdateBlogPage = () => {
                   </button>
                   
                   <button
-                    onClick={() => navigate('/dashboard/crud-page/view-blog')}
+                    onClick={() => navigate('../view-blog')}
                     className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all duration-200"
                   >
                     Back to Blog List

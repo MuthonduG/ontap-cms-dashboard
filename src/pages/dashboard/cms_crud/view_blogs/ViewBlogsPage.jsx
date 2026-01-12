@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Delete as DeleteIcon,
   Edit as EditIcon,
@@ -705,6 +706,7 @@ const EmptyBlogsState = ({ onCreateBlog }) => (
 
 // Main Component
 const ViewBlogsPage = () => {
+  const navigate = useNavigate(); // Add this line
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -913,15 +915,15 @@ const ViewBlogsPage = () => {
     }
   };
 
-  // Handle edit
+  // Handle edit - UPDATED TO USE REACT ROUTER NAVIGATE
   const handleEdit = (blogId) => {
-    // Navigate to edit page
-    window.location.href = `/dashboard/cms_crud/update_blog/${blogId}`;
+    console.log('Navigating to edit blog with ID:', blogId);
+    navigate(`/dashboard/crud-page/update-blog/${blogId}`);
   };
 
-  // Handle create
+  // Handle create - UPDATED TO USE REACT ROUTER NAVIGATE
   const handleCreate = () => {
-    window.location.href = '/dashboard/cms_crud/create_blog';
+    navigate('/dashboard/crud-page/create-blog');
   };
 
   // Handle refresh

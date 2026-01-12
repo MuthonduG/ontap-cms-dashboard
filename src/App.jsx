@@ -23,7 +23,7 @@ function App() {
 
           <Route path="crud-page" element={<CmsCrudPage />} >
             <Route path="create-blog" element={<CreateBlogPage/>}/>
-            <Route path="update-blog" element={<UpdateBlogPage/>}/>
+            <Route path="update-blog/:id" element={<UpdateBlogPage/>}/>
             <Route path="view-blog" element={<ViewBlogsPage/>}/>
           </Route>
 
