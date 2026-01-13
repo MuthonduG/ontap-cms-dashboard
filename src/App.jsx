@@ -22,6 +22,8 @@ function App() {
           <Route index element={<Navigate to="crud-page" replace />} />
 
           <Route path="crud-page" element={<CmsCrudPage />} >
+            <Route index element={<ViewBlogsPage />} />
+            
             <Route path="create-blog" element={<CreateBlogPage/>}/>
             <Route path="update-blog/:id" element={<UpdateBlogPage/>}/>
             <Route path="view-blog" element={<ViewBlogsPage/>}/>
