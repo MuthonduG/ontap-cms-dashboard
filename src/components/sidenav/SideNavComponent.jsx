@@ -45,13 +45,13 @@ const SideNavComponent = () => {
           label: 'Create New Blog',
           icon: <Add />,
           path: 'crud-page/create-blog'
-        },
-        {
-          id: 'update-blog',
-          label: 'Edit Blog',
-          icon: <Edit />,
-          path: 'crud-page/update-blog'
         }
+        // {
+        //   id: 'update-blog',
+        //   label: 'Edit Blog',
+        //   icon: <Edit />,
+        //   path: 'crud-page/update-blog'
+        // }
       ]
     },
     {
