@@ -21,7 +21,7 @@ import {
 } from '@mui/icons-material';
 
 // API Configuration
-const API_BASE_URL = 'http://127.0.0.1:8000/blogs/api/';
+const API_BASE_URL = 'https://cms-api.ontapke.com/blogs/api/';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
