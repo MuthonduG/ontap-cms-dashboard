@@ -1,4 +1,4 @@
-const BASE_URL = 'https://cms-api.ontapke.com/users/api/';
+const BASE_URL = 'http://127.0.0.1:8000/users/api/';
 
 console.log('🔧 OAuth service initialized with BASE_URL:', BASE_URL);
 

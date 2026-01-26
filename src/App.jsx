@@ -10,6 +10,7 @@ import SubscribersPage from './pages/dashboard/subscibers/SubscribersPage';
 import CreateBlogPage from './pages/dashboard/cms_crud/create_blog/CreateBlogPage';
 import UpdateBlogPage from './pages/dashboard/cms_crud/update_blog/UpdateBlogPage';
 import ViewBlogsPage from './pages/dashboard/cms_crud/view_blogs/ViewBlogsPage';
+import CanvasPage from './pages/canvas/CanvasPage';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/dashboard" element={<DashboardPage />}>
           {/* Default route redirects to crud-page */}
           <Route index element={<Navigate to="crud-page" replace />} />
+          <Route path="canvas" element={<CanvasPage />} />
 
           <Route path="crud-page" element={<CmsCrudPage />} >
             <Route index element={<ViewBlogsPage />} />

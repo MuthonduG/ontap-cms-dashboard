@@ -407,7 +407,7 @@ const BlogCard = ({ blog, onDelete, onEdit, onFeatureToggle }) => {
 };
 
 // API Configuration
-const API_BASE_URL = 'https://cms-api.ontapke.com/blogs/api/';
+const API_BASE_URL = 'http://127.0.0.1:8000/blogs/api/';
 
 // Create axios instance with default config
 const api = axios.create({

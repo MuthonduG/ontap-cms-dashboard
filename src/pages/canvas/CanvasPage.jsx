@@ -31,10 +31,7 @@ import {
   Search,
   Hash,
   Calendar,
-  Globe,
-  AlertCircle,
-  CheckCircle,
-  Loader2
+  Globe
 } from 'lucide-react';
 
 // Import languages for lowlight
@@ -79,46 +76,17 @@ lowlight.register('sql', sql);
 lowlight.register('json', json);
 lowlight.register('bash', bash);
 
-// Custom Image extension with upload support and better inline behavior
+// Custom Image extension with remove button
 const CustomImage = Image.extend({
-  addAttributes() {
-    return {
-      ...this.parent?.(),
-      'data-uploading': {
-        default: false,
-        parseHTML: element => element.getAttribute('data-uploading') === 'true',
-      },
-      'data-uploaded': {
-        default: false,
-        parseHTML: element => element.getAttribute('data-uploaded') === 'true',
-      },
-      'data-error': {
-        default: false,
-        parseHTML: element => element.getAttribute('data-error') === 'true',
-      },
-    };
-  },
-  
   addOptions() {
     return {
       ...this.parent?.(),
-      inline: true, // Changed to true for better text flow
-      allowBase64: true,
       HTMLAttributes: {
-        class: 'blog-image inline-image',
-        style: 'max-width: 100%; height: auto; display: inline-block; margin: 0.5rem 0; vertical-align: middle;',
+        class: 'blog-image',
       },
     };
   },
 });
-
-// API Configuration
-const API_BASE_URL = 'http://127.0.0.1:8000/blogs/api/';
-
-// Utility function to get auth token
-const getAuthToken = () => {
-  return localStorage.getItem('access_token');
-};
 
 // SEO Sidebar Component
 const SEOSidebar = ({ 
@@ -548,41 +516,15 @@ const FeaturedImageUploader = ({ featuredImage, onImageChange, onRemoveImage, al
       return;
     }
 
-    // Check file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('File size exceeds 5MB limit');
-      return;
-    }
-
     setIsUploading(true);
     
-    try {
-      // Upload featured image to server
-      const formData = new FormData();
-      formData.append('image', file);
-      
-      const response = await fetch(`${API_BASE_URL}upload_image/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-        },
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to upload featured image');
-      }
-      
-      const data = await response.json();
-      
-      // Pass the uploaded URL and file to parent
-      onImageChange(data.url, file);
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert('Failed to upload featured image. Please try again.');
-    } finally {
+    // In real implementation, you would upload to your server
+    // For now, we'll create a local URL
+    setTimeout(() => {
+      const imageUrl = URL.createObjectURL(file);
+      onImageChange(imageUrl, file.name);
       setIsUploading(false);
-    }
+    }, 1000);
   };
 
   return (
@@ -597,15 +539,10 @@ const FeaturedImageUploader = ({ featuredImage, onImageChange, onRemoveImage, al
         {!featuredImage && (
           <button
             onClick={() => fileInputRef.current?.click()}
-            disabled={isUploading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
-            {isUploading ? (
-              <Loader2 className="animate-spin" size={18} />
-            ) : (
-              <ImagePlus size={18} />
-            )}
-            {isUploading ? 'Uploading...' : 'Add Featured Image'}
+            <ImagePlus size={18} />
+            Add Featured Image
           </button>
         )}
       </div>
@@ -645,13 +582,9 @@ const FeaturedImageUploader = ({ featuredImage, onImageChange, onRemoveImage, al
               src={featuredImage}
               alt={altText || 'Featured'}
               className="w-full h-auto max-h-80 object-contain mx-auto"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = 'https://via.placeholder.com/800x400?text=Image+Failed+to+Load';
-              }}
             />
             <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-              Featured Image
+              Max height: 320px
             </div>
           </div>
           <p className="text-xs text-gray-500 mt-2">
@@ -698,42 +631,18 @@ const ImageUploadModal = ({ isOpen, onClose, onSubmit, isFeatured = false }) => 
 
     setIsUploading(true);
     
-    try {
-      // Upload the file first
-      const formData = new FormData();
-      formData.append('image', file);
-      
-      const response = await fetch(`${API_BASE_URL}upload_image/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-        },
-        body: formData,
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to upload image');
-      }
-      
-      const data = await response.json();
-      
-      // Now call onSubmit with the server URL
-      onSubmit(data.url, alt || file.name);
-      
-    } catch (error) {
-      console.error('Upload error:', error);
-      alert('Failed to upload image. Please try again.');
-    } finally {
+    // Simulate upload delay
+    setTimeout(() => {
+      const imageUrl = URL.createObjectURL(file);
+      onSubmit(imageUrl, alt || file.name);
       setIsUploading(false);
       onClose();
-    }
+    }, 1000);
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    
     if (url) {
-      // If it's a URL, just pass it through
       onSubmit(url, alt);
       setUrl('');
       setAlt('');
@@ -772,7 +681,12 @@ const ImageUploadModal = ({ isOpen, onClose, onSubmit, isFeatured = false }) => 
             <p className="text-sm text-gray-600 mb-1">
               {isUploading ? 'Uploading...' : 'Click to upload or drag and drop'}
             </p>
-            <p className="text-xs text-gray-500">PNG, JPG, GIF, WebP, SVG up to 5MB</p>
+            <p className="text-xs text-gray-500">PNG, JPG, GIF up to 5MB</p>
+            {!isFeatured && (
+              <p className="text-xs text-blue-500 mt-2">
+                Click on images in the editor to remove them
+              </p>
+            )}
           </div>
         </div>
 
@@ -823,7 +737,7 @@ const ImageUploadModal = ({ isOpen, onClose, onSubmit, isFeatured = false }) => 
             </button>
             <button
               type="submit"
-              disabled={!url || isUploading}
+              disabled={!url}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isFeatured ? 'Set as Featured' : 'Add Image'}
@@ -960,26 +874,21 @@ const CodeBlockModal = ({ isOpen, onClose, onSubmit }) => {
   );
 };
 
-const CreateBlogPage = () => {
+const CanvasPage = () => {
   const [showLinkModal, setShowLinkModal] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [showSEOSidebar, setShowSEOSidebar] = useState(false);
   
   const [title, setTitle] = useState('');
-  const [excerpt, setExcerpt] = useState('');
-  const [blogType, setBlogType] = useState('blog');
-  const [isFeatured, setIsFeatured] = useState(false);
   const [featuredImage, setFeaturedImage] = useState('');
-  const [featuredImageFile, setFeaturedImageFile] = useState(null);
   const [featuredImageAlt, setFeaturedImageAlt] = useState('');
+  const [featuredImageFile, setFeaturedImageFile] = useState(null);
   
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [apiError, setApiError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
   
   // SEO Data State
   const [seoData, setSeoData] = useState({
@@ -989,7 +898,6 @@ const CreateBlogPage = () => {
     canonical_url: '',
     search_intent: 'informational',
     scheduled_publish_at: null,
-    featured_image_alt: '',
   });
 
   const editor = useEditor({
@@ -1009,10 +917,10 @@ const CreateBlogPage = () => {
         },
       }),
       CustomImage.configure({
-        inline: true, // Important: Set to true for better text flow
+        inline: false,
         allowBase64: true,
         HTMLAttributes: {
-          class: 'blog-image inline-image',
+          class: 'blog-image',
         },
       }),
       CodeBlockLowlight.configure({
@@ -1082,285 +990,132 @@ const CreateBlogPage = () => {
     return text.substring(0, maxLength).trim() + '...';
   };
 
-  const validateForm = () => {
-    const errors = {};
-    
-    if (!title.trim()) {
-      errors.title = 'Title is required';
-    }
-    
-    if (!editor || !editor.getHTML().trim()) {
-      errors.content = 'Content is required';
-    }
-    
-    if (!seoData.primary_keyword) {
-      errors.primary_keyword = 'Primary keyword is required for SEO';
-    }
-    
-    if (featuredImage && !featuredImageAlt && !seoData.featured_image_alt) {
-      errors.featured_image_alt = 'Alt text is required for featured image';
-    }
-    
-    return errors;
-  };
-
-  // Process inline images before saving
-  const processInlineImages = async (htmlContent) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}process_inline_images/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${getAuthToken()}`,
-        },
-        body: JSON.stringify({ html: htmlContent }),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to process images');
-      }
-      
-      const data = await response.json();
-      return data.processed_html;
-      
-    } catch (error) {
-      console.error('Image processing error:', error);
-      // Return original HTML if processing fails
-      return htmlContent;
-    }
-  };
-
-  const prepareBlogData = async (status = 'draft') => {
+  const prepareBlogData = (status = 'draft') => {
     if (!editor) return null;
     
-    let htmlContent = editor.getHTML();
-    
-    // Process inline images before sending to server
-    try {
-      console.log('Processing inline images...');
-      htmlContent = await processInlineImages(htmlContent);
-      console.log('Images processed successfully');
-    } catch (error) {
-      console.error('Failed to process images:', error);
-      // Continue with unprocessed HTML
-    }
-    
-    // Prepare FormData for the request
-    const formData = new FormData();
-    
-    // Basic fields
-    formData.append('title', title.trim());
-    formData.append('excerpt', excerpt || generateExcerpt(htmlContent));
-    formData.append('body', htmlContent);
-    formData.append('blog_type', blogType);
-    formData.append('status', status);
-    formData.append('is_featured', isFeatured);
-    
-    // SEO fields
-    if (seoData.seo_title) {
-      formData.append('seo_title', seoData.seo_title);
-    } else {
-      formData.append('seo_title', title.substring(0, 60));
-    }
-    
-    if (seoData.meta_description) {
-      formData.append('meta_description', seoData.meta_description);
-    } else if (excerpt) {
-      formData.append('meta_description', excerpt.substring(0, 160));
-    }
-    
-    if (seoData.primary_keyword) {
-      formData.append('primary_keyword', seoData.primary_keyword);
-    }
-    
-    if (seoData.secondary_keywords && seoData.secondary_keywords.length > 0) {
-      formData.append('secondary_keywords', JSON.stringify(seoData.secondary_keywords));
-    }
-    
-    if (seoData.search_intent) {
-      formData.append('search_intent', seoData.search_intent);
-    }
-    
-    if (seoData.canonical_url) {
-      formData.append('canonical_url', seoData.canonical_url);
-    }
-    
-    // Featured image
-    if (featuredImageFile) {
-      formData.append('featured_image', featuredImageFile);
-      formData.append('featured_image_alt', featuredImageAlt || seoData.featured_image_alt || '');
-    } else if (featuredImageAlt || seoData.featured_image_alt) {
-      formData.append('featured_image_alt', featuredImageAlt || seoData.featured_image_alt);
-    }
-    
-    // Scheduling
-    if (status === 'scheduled' && seoData.scheduled_publish_at) {
-      formData.append('scheduled_publish_at', seoData.scheduled_publish_at);
-    }
-    
-    // Internal links (extracted from content)
+    const htmlContent = editor.getHTML();
+    const wordCount = calculateWordCount(htmlContent);
+    const readingTime = calculateReadingTime(wordCount);
+    const headingCounts = calculateHeadingCounts(htmlContent);
     const internalLinks = extractInternalLinks(htmlContent);
-    if (internalLinks.length > 0) {
-      formData.append('internal_links', JSON.stringify(internalLinks));
+    
+    // Check if featured image is a file or URL
+    let featuredImageData = null;
+    if (featuredImageFile) {
+      // For file upload, you'll need to handle this differently
+      // Typically you would upload the file first, then get the URL
+      featuredImageData = featuredImageFile;
+    } else if (featuredImage) {
+      // If it's already a URL
+      featuredImageData = featuredImage;
     }
     
-    return formData;
+    // Prepare the data for Django
+    const blogData = {
+      title: title.trim(),
+      body: htmlContent,
+      excerpt: generateExcerpt(htmlContent),
+      status: status,
+      seo_title: title.substring(0, 60) || title.trim(),
+      meta_description: seoData.meta_description || generateExcerpt(htmlContent, 160),
+      canonical_url: seoData.canonical_url || '',
+      primary_keyword: seoData.primary_keyword || '',
+      secondary_keywords: seoData.secondary_keywords || [],
+      search_intent: seoData.search_intent || 'informational',
+      featured_image: featuredImageData,
+      featured_image_alt: featuredImageAlt || seoData.featured_image_alt || '',
+      scheduled_publish_at: seoData.scheduled_publish_at || null,
+      blog_type: 'blog', // Default, you can add a selector for this
+      internal_links: internalLinks,
+      // These will be calculated by Django, but we can pre-calculate for frontend feedback
+      word_count: wordCount,
+      reading_time_minutes: readingTime,
+      ...headingCounts,
+    };
+    
+    return blogData;
+  };
+
+  // Utility function to get CSRF token
+  const getCSRFToken = () => {
+    const cookieValue = document.cookie
+      .split('; ')
+      .find(row => row.startsWith('csrftoken='))
+      ?.split('=')[1];
+    return cookieValue || '';
   };
 
   const handleSaveDraft = async () => {
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setApiError(Object.values(errors).join(', '));
+    setIsSaving(true);
+    
+    const blogData = prepareBlogData('draft');
+    if (!blogData) {
+      setIsSaving(false);
       return;
     }
     
-    setIsSaving(true);
-    setApiError(null);
-    setSuccessMessage(null);
-    
     try {
-      const blogData = await prepareBlogData('draft');
-      
-      const response = await fetch(`${API_BASE_URL}blogs/create/`, {
+      const response = await fetch('/api/blogs/', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken(),
         },
-        body: blogData,
+        body: JSON.stringify(blogData),
       });
       
-      const responseText = await response.text();
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError);
-        throw new Error('Invalid response from server');
+      if (response.ok) {
+        const data = await response.json();
+        alert('Draft saved successfully!');
+        localStorage.setItem('currentBlogId', data.id);
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.message || 'Failed to save draft'}`);
       }
-      
-      if (!response.ok) {
-        console.error('API error response:', data);
-        throw new Error(data.error || data.message || data.detail || `HTTP ${response.status}: Failed to save draft`);
-      }
-      
-      setSuccessMessage('Draft saved successfully!');
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
-      
     } catch (error) {
       console.error('Save error:', error);
-      setApiError(error.message || 'Failed to save draft. Please try again.');
+      alert('Failed to save draft. Please try again.');
     } finally {
       setIsSaving(false);
     }
   };
 
   const handlePublish = async () => {
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setApiError(Object.values(errors).join(', '));
+    if (!title.trim()) {
+      alert('Please add a title before publishing');
       return;
     }
     
     setIsPublishing(true);
-    setApiError(null);
-    setSuccessMessage(null);
+    
+    const blogData = prepareBlogData('published');
+    if (!blogData) {
+      setIsPublishing(false);
+      return;
+    }
     
     try {
-      const blogData = await prepareBlogData('published');
-      
-      const response = await fetch(`${API_BASE_URL}blogs/create/`, {
+      const response = await fetch('/api/blogs/', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCSRFToken(),
         },
-        body: blogData,
+        body: JSON.stringify(blogData),
       });
       
-      const responseText = await response.text();
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError);
-        throw new Error('Invalid response from server');
+      if (response.ok) {
+        const data = await response.json();
+        alert('Post published successfully!');
+        // Optionally redirect to the published post
+        // window.location.href = `/blog/${data.slug}/`;
+      } else {
+        const error = await response.json();
+        alert(`Error: ${error.message || 'Failed to publish'}`);
       }
-      
-      if (!response.ok) {
-        console.error('API error response:', data);
-        throw new Error(data.error || data.message || data.detail || `HTTP ${response.status}: Failed to publish blog`);
-      }
-      
-      setSuccessMessage('Blog published successfully!');
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
-      
     } catch (error) {
       console.error('Publish error:', error);
-      setApiError(error.message || 'Failed to publish blog. Please try again.');
-    } finally {
-      setIsPublishing(false);
-    }
-  };
-
-  const handleSchedule = async () => {
-    if (!seoData.scheduled_publish_at) {
-      setApiError('Please set a scheduled publish date in the SEO sidebar.');
-      return;
-    }
-    
-    const errors = validateForm();
-    if (Object.keys(errors).length > 0) {
-      setApiError(Object.values(errors).join(', '));
-      return;
-    }
-    
-    setIsPublishing(true);
-    setApiError(null);
-    setSuccessMessage(null);
-    
-    try {
-      const blogData = await prepareBlogData('scheduled');
-      
-      const response = await fetch(`${API_BASE_URL}blogs/create/`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
-        },
-        body: blogData,
-      });
-      
-      const responseText = await response.text();
-      let data;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError);
-        throw new Error('Invalid response from server');
-      }
-      
-      if (!response.ok) {
-        console.error('API error response:', data);
-        throw new Error(data.error || data.message || data.detail || `HTTP ${response.status}: Failed to schedule blog`);
-      }
-      
-      setSuccessMessage('Blog scheduled successfully!');
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => {
-        setSuccessMessage(null);
-      }, 3000);
-      
-    } catch (error) {
-      console.error('Schedule error:', error);
-      setApiError(error.message || 'Failed to schedule blog. Please try again.');
+      alert('Failed to publish. Please try again.');
     } finally {
       setIsPublishing(false);
     }
@@ -1388,30 +1143,12 @@ const CreateBlogPage = () => {
     }
   }, [editor]);
 
-  // Fixed function: Now properly handles adding images with better text flow
-  const handleSubmitImage = useCallback((imageUrl, altText) => {
+  const handleSubmitImage = useCallback((url, alt) => {
     if (editor) {
       editor
         .chain()
         .focus()
-        // Set the image
-        .setImage({ 
-          src: imageUrl,
-          alt: altText || '', 
-          'data-uploaded': 'true'
-        })
-        // Insert a space after the image so you can continue typing
-        .command(({ tr, dispatch }) => {
-          if (dispatch) {
-            // Get current position
-            const pos = tr.selection.from;
-            // Insert a space character
-            tr.insertText(' ', pos);
-            // Move cursor after the space
-            tr.setSelection(tr.selection.constructor.near(tr.doc.resolve(pos + 1)));
-          }
-          return true;
-        })
+        .setImage({ src: url, alt: alt || '' })
         .run();
     }
   }, [editor]);
@@ -1439,9 +1176,11 @@ const CreateBlogPage = () => {
     }
   }, [editor, selectedImage]);
 
-  const handleFeaturedImageChange = (imageUrl, file) => {
+  const handleFeaturedImageChange = (imageUrl, fileName) => {
     setFeaturedImage(imageUrl);
-    setFeaturedImageFile(file);
+    // In a real implementation, you would upload the file to your server
+    // and get back a URL. For now, we're using a local URL.
+    setFeaturedImageFile(fileName);
   };
 
   const getPreviewHTML = () => {
@@ -1466,100 +1205,8 @@ const CreateBlogPage = () => {
     };
   }, [selectedImage, editor]);
 
-  // Add custom CSS for inline images
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.textContent = `
-      .inline-image {
-        display: inline-block !important;
-        vertical-align: middle !important;
-        max-width: 100% !important;
-        height: auto !important;
-        margin: 0.5rem 0 !important;
-      }
-      
-      .ProseMirror p > .inline-image {
-        display: inline !important;
-      }
-      
-      .ProseMirror img.inline-image {
-        cursor: pointer;
-        transition: outline 0.2s;
-      }
-      
-      .ProseMirror img.inline-image:hover {
-        outline: 2px solid #3b82f6;
-      }
-      
-      /* Ensure we can click after images */
-      .ProseMirror > *:last-child {
-        min-height: 1.5em;
-      }
-      
-      /* Better spacing for images in paragraphs */
-      .ProseMirror p {
-        line-height: 1.6;
-      }
-      
-      .ProseMirror p:has(img) {
-        min-height: 1.5em;
-      }
-      
-      /* Make it easier to add text after images */
-      .ProseMirror .inline-image + br {
-        display: none;
-      }
-    `;
-    document.head.appendChild(style);
-    
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
-
   return (
     <div className="min-h-screen bg-white">
-      {/* Status Messages */}
-      {apiError && (
-        <div className="fixed top-4 right-4 z-50 max-w-md">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 shadow-lg">
-            <div className="flex items-start">
-              <AlertCircle className="w-5 h-5 text-red-600 mr-3 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <p className="font-medium text-red-800">Error</p>
-                <p className="text-sm text-red-600 mt-1">{apiError}</p>
-              </div>
-              <button
-                onClick={() => setApiError(null)}
-                className="ml-4 text-sm font-medium text-red-600 hover:text-red-800"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {successMessage && (
-        <div className="fixed top-4 right-4 z-50 max-w-md">
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 shadow-lg">
-            <div className="flex items-start">
-              <CheckCircle className="w-5 h-5 text-green-600 mr-3 mt-0.5 flex-shrink-0" />
-              <div className="flex-1">
-                <p className="font-medium text-green-800">Success!</p>
-                <p className="text-sm text-green-600 mt-1">{successMessage}</p>
-              </div>
-              <button
-                onClick={() => setSuccessMessage(null)}
-                className="ml-4 text-sm font-medium text-green-600 hover:text-green-800"
-              >
-                <X size={16} />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Header with actions */}
       <header className="sticky top-0 z-20 bg-white border-b border-gray-200 px-4 py-3">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
@@ -1581,57 +1228,22 @@ const CreateBlogPage = () => {
           </div>
           
           <div className="flex items-center gap-3">
-            {/* Blog Type Selector */}
-            <select
-              value={blogType}
-              onChange={(e) => setBlogType(e.target.value)}
-              className="px-3 py-1.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="blog">Blog</option>
-              <option value="white_paper">White Paper</option>
-              <option value="case_study">Case Study</option>
-            </select>
-
-            {/* Featured Toggle */}
-            <label className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded-md text-sm hover:bg-gray-50 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isFeatured}
-                onChange={(e) => setIsFeatured(e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              Featured
-            </label>
-
-            {/* Action Buttons */}
             <button
               onClick={handleSaveDraft}
               disabled={isSaving}
               className="flex items-center gap-2 px-5 py-2 border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50"
             >
-              {isSaving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
+              <Save size={18} />
               {isSaving ? 'Saving...' : 'Save Draft'}
             </button>
-
-            {seoData.scheduled_publish_at ? (
-              <button
-                onClick={handleSchedule}
-                disabled={isPublishing}
-                className="flex items-center gap-2 px-5 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 disabled:opacity-50"
-              >
-                {isPublishing ? <Loader2 className="animate-spin" size={18} /> : <Calendar size={18} />}
-                {isPublishing ? 'Scheduling...' : 'Schedule'}
-              </button>
-            ) : (
-              <button
-                onClick={handlePublish}
-                disabled={isPublishing}
-                className="flex items-center gap-2 px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
-              >
-                {isPublishing ? <Loader2 className="animate-spin" size={18} /> : <Send size={18} />}
-                {isPublishing ? 'Publishing...' : 'Publish'}
-              </button>
-            )}
+            <button
+              onClick={handlePublish}
+              disabled={isPublishing}
+              className="flex items-center gap-2 px-5 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
+            >
+              <Send size={18} />
+              {isPublishing ? 'Publishing...' : 'Publish'}
+            </button>
           </div>
         </div>
       </header>
@@ -1652,20 +1264,6 @@ const CreateBlogPage = () => {
           )}
         </div>
 
-        {/* Excerpt input */}
-        <div className="mb-6">
-          <textarea
-            value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-            placeholder="Write a brief excerpt for your blog post..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
-            rows="2"
-          />
-          <p className="text-sm text-gray-500 mt-1">
-            {excerpt.length}/300 characters
-          </p>
-        </div>
-
         {/* Featured Image Section */}
         <FeaturedImageUploader
           featuredImage={featuredImage}
@@ -1673,8 +1271,8 @@ const CreateBlogPage = () => {
           onImageChange={handleFeaturedImageChange}
           onRemoveImage={() => {
             setFeaturedImage('');
-            setFeaturedImageFile(null);
             setFeaturedImageAlt('');
+            setFeaturedImageFile(null);
           }}
           onAltTextChange={setFeaturedImageAlt}
         />
@@ -1688,7 +1286,7 @@ const CreateBlogPage = () => {
                 <div className="mb-8">
                   <img
                     src={featuredImage}
-                    alt={featuredImageAlt || seoData.featured_image_alt || 'Featured'}
+                    alt={featuredImageAlt || 'Featured'}
                     className="w-full h-auto rounded-lg"
                   />
                 </div>
@@ -1774,7 +1372,7 @@ const CreateBlogPage = () => {
           <p className="text-xs text-gray-500">
             • Click on any image to select it<br/>
             • Click the "Remove Image" button to delete<br/>
-            • Text automatically flows after images
+            • Images are constrained to max-height: 500px
           </p>
         </div>
       )}
@@ -1782,4 +1380,4 @@ const CreateBlogPage = () => {
   );
 };
 
-export default CreateBlogPage;
+export default CanvasPage;
